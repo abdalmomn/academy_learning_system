@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BannedUserController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MakeSupervisorOrAdminAccountController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\ResetPasswordController;
@@ -44,6 +45,7 @@ Route::controller(ResetPasswordController::class)->group(function(){
    Route::post('/resend_code', 'resend_reset_code');
    Route::post('/reset_password', 'set_new_password');
 });
+////////////////////                   CATEGORY                  ////////////
 
 
 Route::controller(TeacherRequestsController::class)
@@ -73,3 +75,36 @@ Route::controller(BannedUserController::class)
 
 
 });
+
+/////////////////////            courses               ///////////////
+use App\Http\Controllers\CourseController;
+
+Route::controller(CourseController::class)->group(function () {
+    Route::get('getAllcourses',  'index');
+    Route::get('getCourseDetails/{id}',  'show');
+    Route::get('getMy-courses',  'myCourses');
+    Route::get('getEnded-courses',  'endedCourses');
+    Route::post('createCourse', 'store');
+    Route::post('updateCourse/{id}', 'update');
+    Route::delete('deleteCourses/{id}', 'destroy');
+});
+
+////////////////////
+
+Route::controller(CategoryController::class)->group(function () {
+    Route::get('getAllCategory', 'index');
+    Route::get('getCategoryDetails/{category}', 'show');
+    Route::post('CreateCategory', 'store');
+    Route::post('UpdateCategory/{category}', 'update');
+    Route::delete('DeleteCategory/{category}', 'destroy');
+});
+//
+//Route::controller(SocialiteController::class)->group(function (){
+//    Route::get('/google/redirect', 'redirectToGoogle');
+//    Route::get('/google/callback', 'handleGoogleCallback');
+//});
+
+
+Route::get('/user', function (Request $request) {
+    return $request->user();
+})->middleware('auth:sanctum');

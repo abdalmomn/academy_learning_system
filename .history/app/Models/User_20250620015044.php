@@ -3,16 +3,12 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Contracts\Auth\CanResetPassword;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements MustVerifyEmail, CanResetPassword
+class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens, HasRoles;
@@ -29,7 +25,6 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPassword
         'password',
         'social_id',
         'social_type',
-        'is_approved',
     ];
 
     /**
@@ -55,22 +50,14 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPassword
         ];
     }
 
-    public function academic_certificates(): hasMany
+    public function academic_certificates()
     {
-        return $this->hasMany(AcademicCertificate::class, 'teacher_id', 'id');
+        return $this->hasMany(AcademicCertificate::class);
     }
     public function achievements()
     {
-        return $this->belongsToMany(Achievement::class)->withTimestamps()->withPivot('is_done', 'progress_percentage');
+        return $this->hasMany(Achievement::class);
     }
-//    public function academic_certificates()
-//    {
-//        return $this->hasMany(AcademicCertificate::class);
-//    }
-//    public function achievements()
-//    {
-//        return $this->hasMany(Achievement::class);
-//    }
 
     public function banned_user()
     {
@@ -87,33 +74,12 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPassword
     }
     public function courses()
     {
-//        return $this->belongsToMany(Course::class)
-//            ->withPivot(['is_completed', 'completed_at', 'certificate_id'])
-//            ->withTimestamps();
-//        return $this->hasOne(Course::class);
         return $this->hasMany(Course::class);
     }
 
     public function courseRate()
     {
         return $this->hasMany(CourseRating::class);
-    }
-    public function teacher_ratings_given()
-    {
-        return $this->hasMany(TeacherRating::class, 'user_id');
-    }
-
-
-
-    // Ratings this user (as a teacher) received
-    public function teacher_ratings_received()
-    {
-        return $this->hasMany(TeacherRating::class, 'teacher_id');
-    }
-
-    public function strike()
-    {
-        return $this->hasOne(Strike::class);
     }
     public function teacherRate()
     {
@@ -127,10 +93,6 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPassword
     public function examResult()
     {
         return $this->hasOne(ExamResult::class);
-    }
-    public function interested_categories()
-    {
-        return $this->belongsToMany(Category::class)->withTimestamps();
     }
     public function interests()
     {
@@ -165,27 +127,6 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPassword
     {
         return $this->hasOne(Wallet::class);
     }
-//    public function watch_later()
-//    {
-//        return $this->belongsToMany(Video::class, 'user_video')->withTimestamps();
-//    }
-
-    public function leader_board()
-    {
-        return $this->belongsTo(LeaderBoard::class, 'leader_id');
-    }
-    public function certificates()
-    {
-        return $this->hasManyThrough(Certificate::class, 'course_user');
-    }
-    public function attendedVideos()
-    {
-        return $this->belongsToMany(Video::class, 'user_attendance')
-            ->withPivot('is_attendance')
-            ->withTimestamps();
-    }
-
-
     public function watchLater()
     {
         return $this->hasMany(WatchLater::class);

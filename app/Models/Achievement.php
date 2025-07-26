@@ -10,10 +10,12 @@ class Achievement extends Model
         'title',
         'description',
         'icon_path',
+        'user_id'
     ];
 
     public function user()
     {
-        return $this->belongsToMany(User::class,'user_id')->withTimestamps()->withPivot('is_done','progress_percentage');
+//        return $this->belongsToMany(User::class,'user_id')->withTimestamps()->withPivot('is_done','progress_percentage');
+        return $this->belongsTo(User::class,'user_id');
     }
 }

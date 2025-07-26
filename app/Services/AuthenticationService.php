@@ -45,6 +45,8 @@ class AuthenticationService
                     ]);
                 }
             }
+        //create a user with Request file information
+        $user = User::query()->create((array)$signUpDto);
 
         $user->assignRole($signUpDto->user_type);
         $user = $this->helper->give_and_load_permissions_and_roles($signUpDto->user_type,$user);
@@ -56,6 +58,8 @@ class AuthenticationService
                 unset($user->token);
             }
 
+        //login user immediately
+        // Auth::login($user);
 
 //        event(new UserRegistered($user));
         Event::dispatch(new UserRegistered($user));
@@ -63,7 +67,10 @@ class AuthenticationService
         //Commit the transaction if there is no problems
         DB::commit();
 
-        //save success signup in log file
+        //create token to the user when he signed up
+        $user['token'] = $user->createToken("token")->plainTextToken;
+
+            //save success signup in log file
         Log::info( 'New user signed up', [
             'user_id' => $user->id,
             'username' => $user->username,
@@ -79,6 +86,8 @@ class AuthenticationService
             'message' => $user->is_approved
                 ? 'Signed up successfully.'
                 : 'Your account is pending admin approval.'
+//            'data' => $user,
+//            'message' => 'signed up successfully'
         ];
         }catch(Exception $e){
             DB::rollBack();
@@ -131,6 +140,7 @@ class AuthenticationService
                         'message' => 'Your account is awaiting admin approval.'
                     ];
                 }
+
                 //give the user his permissions
                 $user = $this->helper->appendRolesAndPermissions($user);
                 //create token to the user when he logged in

@@ -11,25 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('achievements', function (Blueprint $table) {
+        Schema::create('enthusiasm', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->text('description');
-<<<<<<< HEAD
-            $table->string('icon_path')->nullable();
-=======
-            $table->string('icon_path');
             $table->foreignId('user_id')->references('id')->on('users');
->>>>>>> ca7ced0 (first version: database, models and spatie role)
+            $table->date('date');
+            $table->integer('watch_time')->default(0);
+            $table->boolean('attended')->default(false);
+            $table->integer('streak')->default(0);
             $table->timestamps();
         });
     }
 
-    /**
+        /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('achievements');
+        Schema::dropIfExists('enthusiasms');
     }
 };

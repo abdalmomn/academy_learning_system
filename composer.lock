@@ -4,7 +4,15 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
+<<<<<<< HEAD
+<<<<<<< HEAD
     "content-hash": "f903f45be6fa22c142fac347d6d60787",
+=======
+    "content-hash": "1d223a74f8e5a5dd2e8405409fae750f",
+>>>>>>> aabffcc (signup, login, email verification and google login)
+=======
+    "content-hash": "69a6df03a869c763da35a91a98a6f011",
+>>>>>>> ca7ced0 (first version: database, models and spatie role)
     "packages": [
         {
             "name": "brick/math",
@@ -511,6 +519,7 @@
             "time": "2025-03-06T22:45:56+00:00"
         },
         {
+<<<<<<< HEAD
             "name": "firebase/php-jwt",
             "version": "v6.11.1",
             "source": {
@@ -574,6 +583,8 @@
             "time": "2025-04-09T20:32:01+00:00"
         },
         {
+=======
+>>>>>>> ca7ced0 (first version: database, models and spatie role)
             "name": "fruitcake/php-cors",
             "version": "v1.3.0",
             "source": {
@@ -1333,6 +1344,7 @@
             "time": "2025-06-10T14:48:34+00:00"
         },
         {
+<<<<<<< HEAD
             "name": "laravel/nightwatch",
             "version": "v1.10.4",
             "source": {
@@ -1416,6 +1428,8 @@
             "time": "2025-07-06T02:37:59+00:00"
         },
         {
+=======
+>>>>>>> ca7ced0 (first version: database, models and spatie role)
             "name": "laravel/prompts",
             "version": "v0.3.5",
             "source": {
@@ -1600,6 +1614,7 @@
             "time": "2025-03-19T13:51:03+00:00"
         },
         {
+<<<<<<< HEAD
             "name": "laravel/socialite",
             "version": "v5.21.0",
             "source": {
@@ -1672,6 +1687,8 @@
             "time": "2025-05-19T12:56:37+00:00"
         },
         {
+=======
+>>>>>>> ca7ced0 (first version: database, models and spatie role)
             "name": "laravel/tinker",
             "version": "v2.10.1",
             "source": {
@@ -2115,6 +2132,7 @@
             "time": "2024-09-21T08:32:55+00:00"
         },
         {
+<<<<<<< HEAD
             "name": "league/oauth1-client",
             "version": "v1.11.0",
             "source": {
@@ -2191,6 +2209,8 @@
             "time": "2024-12-10T19:59:05+00:00"
         },
         {
+=======
+>>>>>>> ca7ced0 (first version: database, models and spatie role)
             "name": "league/uri",
             "version": "7.5.1",
             "source": {
@@ -2866,6 +2886,7 @@
             "time": "2025-05-08T08:14:37+00:00"
         },
         {
+<<<<<<< HEAD
             "name": "paragonie/constant_time_encoding",
             "version": "v3.0.0",
             "source": {
@@ -2983,6 +3004,8 @@
             "time": "2020-10-15T08:29:30+00:00"
         },
         {
+=======
+>>>>>>> ca7ced0 (first version: database, models and spatie role)
             "name": "phpoption/phpoption",
             "version": "1.9.3",
             "source": {
@@ -3058,6 +3081,7 @@
             "time": "2024-07-20T21:41:07+00:00"
         },
         {
+<<<<<<< HEAD
             "name": "phpseclib/phpseclib",
             "version": "3.0.45",
             "source": {
@@ -3168,6 +3192,8 @@
             "time": "2025-06-22T22:54:43+00:00"
         },
         {
+=======
+>>>>>>> ca7ced0 (first version: database, models and spatie role)
             "name": "psr/clock",
             "version": "1.0.0",
             "source": {
