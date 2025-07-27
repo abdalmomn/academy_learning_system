@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Course extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'course_name',
         'description',
@@ -18,11 +20,14 @@ class Course extends Model
         'category_id'
     ];
 
-    public function users()
+//    public function users()
+//    {
+//        return $this->belongsToMany(User::class)
+//            ->withPivot(['is_completed' , 'certificate_id'])
+//            ->withTimestamps();
+    public function user()
     {
-        return $this->belongsToMany(User::class)
-            ->withPivot(['is_completed' , 'certificate_id'])
-            ->withTimestamps();
+        return $this->belongsTo(User::class,'user_id');
     }
     public function category()
     {
@@ -32,7 +37,8 @@ class Course extends Model
     {
         return $this->hasMany(CourseRating::class);
     }
-    public function course_requirements()
+//    public function course_requirements()
+    public function requirements()
     {
         return $this->hasMany(CourseRequirement::class);
     }

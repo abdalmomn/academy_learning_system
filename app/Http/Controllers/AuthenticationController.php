@@ -40,6 +40,7 @@ class AuthenticationController extends Controller
 
 
         $signUpDto = SignUpDto::fromArray($data);
+            $signUpDto = SignUpDto::fromArray($request->validated());
             $data = $this->authenticationService->sign_up($signUpDto);
             return $this->Success($data['data'],$data['message']);
     }

@@ -24,7 +24,10 @@ return [
          * `Spatie\Permission\Contracts\Role` contract.
          */
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> ca7ced0 (first version: database, models and spatie role)
         'role' => Spatie\Permission\Models\Role::class,
 
     ],

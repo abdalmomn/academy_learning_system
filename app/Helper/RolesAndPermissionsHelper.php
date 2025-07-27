@@ -30,12 +30,17 @@ class RolesAndPermissionsHelper
 
     public function give_and_load_permissions_and_roles($Role,$user)
     {
-        if (!$user->hasRole($Role)) {
-            $user->assignRole($Role);
-        }
+//        if (!$user->hasRole($Role)) {
+//            $user->assignRole($Role);
+//        }
+//        // Assign permissions associated with the client role
+//        $permissions = $user->getRoleNames()->map(function($roleName) {
+//            return \Spatie\Permission\Models\Role::findByName($roleName,'web')->permissions->pluck('name')->toArray();
+
+
         // Assign permissions associated with the client role
         $permissions = $user->getRoleNames()->map(function($roleName) {
-            return \Spatie\Permission\Models\Role::findByName($roleName,'web')->permissions->pluck('name')->toArray();
+            return \Spatie\Permission\Models\Role::findByName($roleName)->permissions->pluck('name')->toArray();
         })->flatten()->unique();
         $user->givePermissionTo($permissions);
 

@@ -14,6 +14,7 @@ class LeaderBoard extends Model
 
     public function leader()
     {
+<<<<<<< HEAD
         return $this->hasMany(User::class);
     }
 
@@ -21,4 +22,13 @@ class LeaderBoard extends Model
 //    {
 //        return $this->belongsTo(Course::class, 'course_id');
 //    }
+=======
+        return $this->morphTo();
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'course_id');
+    }
+>>>>>>> ca7ced0 (first version: database, models and spatie role)
 }

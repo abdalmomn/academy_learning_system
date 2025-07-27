@@ -40,7 +40,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+<<<<<<< HEAD
 
+=======
+>>>>>>> ca7ced0 (first version: database, models and spatie role)
     ],
 
     /*
