@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('course_requirements', function (Blueprint $table) {
             $table->id();
             $table->text('requirements');
-            $table->foreignId('user_id')->references('id')->on('users');
+            $table->foreignId('course_id')->references('id')->on('courses')->onDelete('cascade');
             $table->timestamps();
         });
     }

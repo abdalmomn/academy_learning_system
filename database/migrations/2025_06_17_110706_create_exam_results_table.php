@@ -16,8 +16,8 @@ return new class extends Migration
             $table->integer('score');
             $table->integer('total');
             $table->text('feedback')->nullable();
-            $table->foreignId('user_id')->references('id')->on('users');
-            $table->foreignId('exam_id')->references('id')->on('exams');
+            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignId('exam_id')->references('id')->on('exams')->onDelete('cascade');
             $table->timestamps();
         });
     }

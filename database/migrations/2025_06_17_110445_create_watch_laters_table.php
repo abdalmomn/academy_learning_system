@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('watch_laters', function (Blueprint $table) {
+        Schema::create('watch_later', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->references('id')->on('users');
-            $table->foreignId('video_id')->references('id')->on('videos');
+            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignId('video_id')->references('id')->on('videos')->onDelete('cascade');
             $table->timestamps();
         });
     }

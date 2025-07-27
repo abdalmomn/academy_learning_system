@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('profile_details', function (Blueprint $table) {
             $table->id();
-            $table->string('first_name');
-            $table->string('last_name');
-            $table->date('date_of_birth');
-            $table->integer('phone_number');
-            $table->string('profile_photo');
-            $table->foreignId('user_id')->references('id')->on('users');
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->date('date_of_birth')->nullable();
+            $table->string('phone_number')->nullable();
+            $table->string('profile_photo')->nullable();
+            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

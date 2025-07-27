@@ -7,9 +7,9 @@ class CreateLeaderboardsTable extends Migration
 {
     public function up()
     {
-        Schema::create('leaderboards', function (Blueprint $table) {
+        Schema::create('leader_boards', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('leader_id');
+            $table->foreignId('leader_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('leader_type');
             $table->integer('points')->default(0);
             $table->timestamps();

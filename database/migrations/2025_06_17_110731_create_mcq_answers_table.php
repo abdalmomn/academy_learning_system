@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('mcq_answers', function (Blueprint $table) {
             $table->id();
             $table->boolean('is_correct');
-            $table->foreignId('user_id')->references('id')->on('users');
-            $table->foreignId('question_id')->references('id')->on('questions');
-            $table->foreignId('selected_option_id')->references('id')->on('mcq_options');
+            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignId('question_id')->references('id')->on('questions')->onDelete('cascade');
+            $table->foreignId('selected_option_id')->references('id')->on('mcq_options')->onDelete('cascade');
             $table->timestamps();
         });
     }

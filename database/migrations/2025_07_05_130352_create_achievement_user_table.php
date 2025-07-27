@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('achievement_user', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->references('id')->on('users');
-            $table->foreignId('achievement_id')->references('id')->on('achievements');
+            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignId('achievement_id')->references('id')->on('achievements')->onDelete('cascade');
             $table->integer('progress_percentage');
             $table->boolean('is_done');
             $table->timestamps();

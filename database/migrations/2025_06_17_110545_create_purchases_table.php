@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->float('price');
             $table->enum('payment_status',['paid', 'pending', 'failed']);
-            $table->foreignId('user_id')->references('id')->on('users');
-            $table->foreignId('course_id')->references('id')->on('courses');
-            $table->foreignId('transaction_id')->references('id')->on('transactions');
+            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignId('course_id')->references('id')->on('courses')->onDelete('cascade');
+            $table->foreignId('transaction_id')->references('id')->on('transactions')->onDelete('cascade');
             $table->timestamps();
         });
     }

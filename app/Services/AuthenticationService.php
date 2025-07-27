@@ -8,6 +8,7 @@ use App\Events\UserRegistered;
 use App\Helper\RolesAndPermissionsHelper;
 use App\Models\AcademicCertificate;
 use App\Models\BannedUser;
+use App\Models\ProfileDetail;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -35,6 +36,8 @@ class AuthenticationService
 
         //create a user with Request file information
         $user = User::query()->create($userData);
+        ProfileDetail::query()->create(['user_id' => $user->id]);
+
             $certificates = [];
             if ($signUpDto->user_type === 'teacher' && !empty($signUpDto->file_path)) {
                 foreach ($signUpDto->file_path as $path) {

@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('enthusiasm', function (Blueprint $table) {
+        Schema::create('strikes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->references('id')->on('users');
+            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->date('date');
             $table->integer('watch_time')->default(0);
             $table->boolean('attended')->default(false);

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->text('question_text');
             $table->enum('question_type',['mcq','project']);
             $table->integer('mark');
-            $table->foreignId('exam_id')->references('id')->on('exams');
+            $table->foreignId('exam_id')->references('id')->on('exams')->onDelete('cascade');
             $table->timestamps();
         });
     }

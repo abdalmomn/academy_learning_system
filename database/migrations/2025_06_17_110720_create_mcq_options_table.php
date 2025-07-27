@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->text('option_text');
             $table->boolean('is_correct');
-            $table->foreignId('question_id')->references('id')->on('questions');
+            $table->foreignId('question_id')->references('id')->on('questions')->onDelete('cascade');
             $table->timestamps();
         });
     }

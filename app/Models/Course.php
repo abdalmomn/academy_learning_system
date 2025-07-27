@@ -27,7 +27,9 @@ class Course extends Model
 //            ->withTimestamps();
     public function user()
     {
-        return $this->belongsTo(User::class,'user_id');
+        return $this->belongsToMany(User::class,'user_courses')
+            ->withPivot(['is_completed' , 'certificate_id'])
+            ->withTimestamps();
     }
     public function category()
     {

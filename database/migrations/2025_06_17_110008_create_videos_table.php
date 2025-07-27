@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('url');
             $table->string('title');
             $table->string('poster');
+            $table->foreignId('course_id')->references('id')->on('courses')->onDelete('cascade');
             $table->timestamps();
         });
     }

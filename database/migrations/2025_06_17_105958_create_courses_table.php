@@ -20,8 +20,8 @@ return new class extends Migration
             $table->boolean('is_paid');
             $table->date('start_date');
             $table->date('end_date');
-            $table->foreignId('user_id')->references('id')->on('users');
-            $table->foreignId('category_id')->references('id')->on('categories');
+            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignId('category_id')->references('id')->on('categories')->onDelete('cascade');
             $table->timestamps();
         });
     }

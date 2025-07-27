@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\ProfileDetail;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -106,6 +107,7 @@ class RolePermissionSeeder extends Seeder
             'role' => 'admin'
 >>>>>>> ca7ced0 (first version: database, models and spatie role)
         ]);
+        ProfileDetail::query()->create(['user_id' => $adminUser->id]);
 
         $adminUser->assignRole($adminRole);
         $permissions =$adminRole->permissions()->pluck('name')->toArray();
@@ -122,6 +124,7 @@ class RolePermissionSeeder extends Seeder
             'role' => 'supervisor'
 >>>>>>> ca7ced0 (first version: database, models and spatie role)
         ]);
+        ProfileDetail::query()->create(['user_id' => $supervisorUser->id]);
 
         $supervisorUser->assignRole($supervisorRole);
         $permissions =$supervisorRole->permissions()->pluck('name')->toArray();
@@ -139,6 +142,7 @@ class RolePermissionSeeder extends Seeder
             'role' => 'woman'
 >>>>>>> ca7ced0 (first version: database, models and spatie role)
         ]);
+        ProfileDetail::query()->create(['user_id' => $womanUser->id]);
 
         $womanUser->assignRole($womanRole);
         $permissions =$womanRole->permissions()->pluck('name')->toArray();
@@ -157,6 +161,7 @@ class RolePermissionSeeder extends Seeder
             'role' => 'child'
 >>>>>>> ca7ced0 (first version: database, models and spatie role)
         ]);
+        ProfileDetail::query()->create(['user_id' => $childUser->id]);
 
         $childUser->assignRole($childRole);
         $permissions =$childRole->permissions()->pluck('name')->toArray();
@@ -191,6 +196,7 @@ class RolePermissionSeeder extends Seeder
             'role' => 'teacher'
 >>>>>>> ca7ced0 (first version: database, models and spatie role)
         ]);
+        ProfileDetail::query()->create(['user_id' => $teacherUser->id]);
 
         $teacherUser->assignRole($teacherRole);
         $permissions =$teacherRole->permissions()->pluck('name')->toArray();

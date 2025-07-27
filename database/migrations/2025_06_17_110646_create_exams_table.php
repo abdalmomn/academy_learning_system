@@ -21,8 +21,8 @@ return new class extends Migration
             $table->date('end_date');
             $table->time('duration_minutes')->nullable();
             $table->boolean('is_mandatory');
-            $table->foreignId('course_id')->references('id')->on('courses');
-            $table->foreignId('video_id')->references('id')->on('videos');
+            $table->foreignId('course_id')->references('id')->on('courses')->onDelete('cascade');
+            $table->foreignId('video_id')->references('id')->on('videos')->onDelete('cascade');
             $table->timestamps();
         });
     }

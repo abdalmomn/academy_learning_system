@@ -18,7 +18,7 @@ return new class extends Migration
             $table->enum('status',['pending', 'completed', 'failed', 'refunded']);
             $table->enum('transaction_type',['credit', 'debit']);
             $table->enum('transaction_method',['card', 'paypal', 'bank', 'referral', 'manual', 'admin', 'reward', 'course_purchase']);
-            $table->foreignId('user_id')->references('id')->on('users');
+            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('promo_code');
             $table->integer('discount_percentage');
-            $table->foreignId('teacher_id')->references('id')->on('users');
+            $table->foreignId('teacher_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->float('balance');
             $table->enum('status',['active', 'suspended', 'disabled']);
-            $table->foreignId('user_id')->references('id')->on('users');
+            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

@@ -4,6 +4,7 @@ use App\Http\Controllers\BannedUserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MakeSupervisorOrAdminAccountController;
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\TeacherRequestsController;
@@ -64,15 +65,22 @@ Route::controller(MakeSupervisorOrAdminAccountController::class)
 });
 
 Route::controller(BannedUserController::class)
-    ->middleware('auth:sanctum')
-    ->group(function (){
-       Route::post('/ban_user', 'ban_user');
-       Route::post('/banned_users', 'all_banned_users');
-       Route::get('/temporary_banned_users', 'temporary_banned_users');
-       Route::get('/permanent_banned_users', 'permanent_banned_users');
-    });
+->middleware('auth:sanctum')
+->group(function (){
+   Route::post('/ban_user', 'ban_user');
+   Route::post('/banned_users', 'all_banned_users');
+   Route::get('/temporary_banned_users', 'temporary_banned_users');
+   Route::get('/permanent_banned_users', 'permanent_banned_users');
+});
 
-
+Route::controller(ProfileController::class)
+->middleware('auth:sanctum')
+->group(function(){
+   Route::get('/my_profile' , 'show_my_profile_details');
+   Route::get('/profile/{user_id}' , 'show_user_profile_details');
+   Route::post('/profile/edit' , 'edit_profile');
+   Route::post('/profile/delete' , 'delete_account');
+});
 
 });
 

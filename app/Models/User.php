@@ -87,11 +87,9 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPassword
     }
     public function courses()
     {
-//        return $this->belongsToMany(Course::class)
-//            ->withPivot(['is_completed', 'completed_at', 'certificate_id'])
-//            ->withTimestamps();
-//        return $this->hasOne(Course::class);
-        return $this->hasMany(Course::class);
+        return $this->belongsToMany(Course::class, 'user_courses')
+            ->withPivot(['is_completed', 'completed_at', 'certificate_id'])
+            ->withTimestamps();
     }
 
     public function courseRate()
@@ -145,7 +143,7 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPassword
     {
         return $this->hasMany(Notification::class);
     }
-    public function details()
+    public function profile_details()
     {
         return $this->hasOne(ProfileDetail::class);
     }
@@ -165,10 +163,10 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPassword
     {
         return $this->hasOne(Wallet::class);
     }
-//    public function watch_later()
-//    {
-//        return $this->belongsToMany(Video::class, 'user_video')->withTimestamps();
-//    }
+    public function watch_later()
+    {
+        return $this->belongsToMany(Video::class, 'watch_later')->withTimestamps();
+    }
 
     public function leader_board()
     {

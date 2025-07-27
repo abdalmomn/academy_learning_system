@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('user_courses', function (Blueprint $table) {
             $table->id();
             $table->boolean('is_completed')->default(false);
-            $table->foreignId('certificate_id')->nullable()->constrained()->onDelete('set null');
-            $table->foreignId('user_id')->references('id')->on('users');
-            $table->foreignId('course_id')->references('id')->on('courses');
+            $table->foreignId('certificate_id')->nullable()->constrained()->onDelete('set null')->onDelete('cascade');
+            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignId('course_id')->references('id')->on('courses')->onDelete('cascade');
             $table->timestamps();
         });
     }
