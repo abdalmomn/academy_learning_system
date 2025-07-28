@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BannedUserController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\MakeSupervisorOrAdminAccountController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\ProfileController;
@@ -20,24 +21,7 @@ Route::controller(AuthenticationController::class)->group(function(){
    Route::get('spatie','roles')->middleware('auth:sanctum');
 });
 
-Route::middleware('auth:sanctum')->group(function (){
-    // Email verification notice
-    Route::get('email/verify', function (){
-      return response()->json(['message' => 'Verify your email address']);
-    }) -> name('verification.notice');
 
-    // Email verification handler
-    Route::get('email/verify/{id}/{hash}', function (EmailVerificationRequest $request){
-     $request->fulfill();
-     return response()->json(['message' => 'Email verified successfully']);
-    })->middleware('signed')->name('verification.verify');
-
-    // Resend verification email
-    Route::post('email/resend', function (Request $request){
-        $request->user()->sendEmailVerificationNotification();
-        return response()->json(['message' => 'Verification email resent.']);
-    })->middleware('throttle:6,1')->name('verification.resend');
-});
 
 
 Route::controller(ResetPasswordController::class)->group(function(){
@@ -46,7 +30,6 @@ Route::controller(ResetPasswordController::class)->group(function(){
    Route::post('/resend_code', 'resend_reset_code');
    Route::post('/reset_password', 'set_new_password');
 });
-////////////////////                   CATEGORY                  ////////////
 
 
 Route::controller(TeacherRequestsController::class)
@@ -79,13 +62,12 @@ Route::controller(ProfileController::class)
    Route::get('/my_profile' , 'show_my_profile_details');
    Route::get('/profile/{user_id}' , 'show_user_profile_details');
    Route::post('/profile/edit' , 'edit_profile');
+
    Route::post('/profile/delete' , 'delete_account');
 });
 
 });
 
-/////////////////////            courses               ///////////////
-use App\Http\Controllers\CourseController;
 
 Route::controller(CourseController::class)->group(function () {
     Route::get('getAllcourses',  'index');
@@ -97,7 +79,7 @@ Route::controller(CourseController::class)->group(function () {
     Route::delete('deleteCourses/{id}', 'destroy');
 });
 
-////////////////////
+
 
 Route::controller(CategoryController::class)->group(function () {
     Route::get('getAllCategory', 'index');

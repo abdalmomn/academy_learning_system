@@ -26,7 +26,6 @@ class Video extends Model
     {
         return $this->belongsTo(Course::class,'course_id');
     }
-<<<<<<< HEAD
     public function users_who_watched_later()
     {
         return $this->belongsToMany(User::class, 'user_video')->withTimestamps();
@@ -37,11 +36,4 @@ class Video extends Model
             ->withPivot('is_attendance')
             ->withTimestamps();
     }
-
-=======
-    public function watchLater()
-    {
-        return $this->hasMany(WatchLater::class);
-    }
->>>>>>> ca7ced0 (first version: database, models and spatie role)
 }

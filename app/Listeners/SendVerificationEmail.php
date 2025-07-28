@@ -25,9 +25,9 @@ class SendVerificationEmail
 
 
 
-//        dispatch(new SendEmailVerificationJob($event->user));
+        dispatch(new SendEmailVerificationJob($event->user));
 
-        SendEmailVerificationJob::dispatch($event->user)->delay(now()->addMinutes(1));
+//        SendEmailVerificationJob::dispatch($event->user)->delay(now()->addMinutes(1));
 
     }
 }

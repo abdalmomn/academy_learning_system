@@ -15,12 +15,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RolePermissionSeeder::class,
-<<<<<<< HEAD
             CategorySeeder::class,
             CourseSeeder::class
 
-=======
->>>>>>> ca7ced0 (first version: database, models and spatie role)
         ]);
     }
 }

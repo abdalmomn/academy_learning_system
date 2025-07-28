@@ -48,8 +48,6 @@ class AuthenticationService
                     ]);
                 }
             }
-        //create a user with Request file information
-        $user = User::query()->create((array)$signUpDto);
 
         $user->assignRole($signUpDto->user_type);
         $user = $this->helper->give_and_load_permissions_and_roles($signUpDto->user_type,$user);
@@ -61,10 +59,7 @@ class AuthenticationService
                 unset($user->token);
             }
 
-        //login user immediately
-        // Auth::login($user);
 
-//        event(new UserRegistered($user));
         Event::dispatch(new UserRegistered($user));
 
         //Commit the transaction if there is no problems

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTO\SocialiteDto;
 use App\Helper\RolesAndPermissionsHelper;
+use App\Models\ProfileDetail;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -52,6 +53,7 @@ class SocialiteService
                     $dto->toArray(),
                     ['password' => Hash::make(Str::random(8))]
                 ));
+                ProfileDetail::query()->create(['user_id' => $user->id]);
 
                 if (!$user->hasRole($userType)) {
                     $user->assignRole($userType);

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('academic_certificates', function (Blueprint $table) {
             $table->id();
             $table->string('file_path');
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->foreignId('teacher_id')->references('id')->on('users');
             $table->timestamps();
         });

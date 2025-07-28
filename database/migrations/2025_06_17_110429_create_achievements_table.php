@@ -15,12 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description');
-<<<<<<< HEAD
             $table->string('icon_path')->nullable();
-=======
-            $table->string('icon_path');
-            $table->foreignId('user_id')->references('id')->on('users');
->>>>>>> ca7ced0 (first version: database, models and spatie role)
             $table->timestamps();
         });
     }
