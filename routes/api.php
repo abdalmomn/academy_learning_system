@@ -6,9 +6,11 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\MakeSupervisorOrAdminAccountController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PromoCodeController;
 use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\TeacherRequestsController;
+use App\Http\Controllers\VideoController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -69,7 +71,9 @@ Route::controller(ProfileController::class)
 });
 
 
-Route::controller(CourseController::class)->group(function () {
+Route::controller(CourseController::class)
+    ->middleware('auth:sanctum')
+    ->group(function () {
     Route::get('getAllcourses',  'index');
     Route::get('getCourseDetails/{id}',  'show');
     Route::get('getMy-courses',  'myCourses');
@@ -77,7 +81,11 @@ Route::controller(CourseController::class)->group(function () {
     Route::post('createCourse', 'store');
     Route::post('updateCourse/{id}', 'update');
     Route::delete('deleteCourses/{id}', 'destroy');
-});
+    Route::post('update_requirement/{requirement_id}', 'update_course_requirements');
+    Route::delete('delete_requirement/{requirement_id}', 'delete_course_requirements');
+    Route::get('pending-courses',  'pending_courses');
+    Route::post('approve-course/{course_id}',  'approve_course');
+    });
 
 
 
@@ -94,6 +102,22 @@ Route::controller(CategoryController::class)->group(function () {
 //    Route::get('/google/callback', 'handleGoogleCallback');
 //});
 
+Route::controller(VideoController::class)
+    ->middleware('auth:sanctum')->group(function(){
+   Route::post('add_video' , 'add_video');
+   Route::post('update_video/{course_id}/{video_id}' , 'update_video');
+   Route::delete('delete_video/{course_id}/{video_id}' , 'delete_video');
+   Route::get('show_video/{video_id}' , 'show_video');
+    });
+
+Route::controller(PromoCodeController::class)
+    ->middleware('auth:sanctum')->group(function(){
+    Route::post('create_promo_code','create_promo_code');
+    Route::get('my_promo_codes','show_my_promo_codes');
+    Route::get('all_promo_codes','show_all_promo_codes');
+    Route::delete('delete_promo_code/{code_id}','delete_promo_code');
+    Route::delete('delete_promo_codes','delete_all_promo_codes');
+});
 
 Route::get('/user', function (Request $request) {
     return $request->user();

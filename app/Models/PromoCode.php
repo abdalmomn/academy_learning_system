@@ -9,7 +9,9 @@ class PromoCode extends Model
     protected $fillable = [
         'teacher_id',
         'promo_code',
-        'discount_percentage'
+        'discount_percentage',
+        'usage_limit',
+        'expires_in'
     ];
     public function teacher()
     {

@@ -113,12 +113,12 @@
                 try {
                     $category= Category::find($id);
                     if(!$category){
-                        DB::rollBack();
                         return [
                             'data' => null,
                             'message' => 'Category not found'
                         ];
-                    }  $category->update([
+                    }
+                    $category->update([
                         'category_name' => $dto->category_name
                     ]);
 
@@ -160,7 +160,6 @@
                     $category= Category::find($id);
                     //check if categories is found
                     if(!$category) {
-                        DB::rollBack();
                         return [
                             'data' => null,
                             'message' => 'Category not found'

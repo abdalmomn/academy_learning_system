@@ -34,7 +34,7 @@ class ProfileController extends Controller
         $validated_data = $request->validated();
         if ($request->hasFile('profile_photo')){
             $image_path = $request->file('profile_photo')->store('profile_images','public');
-            $image_url = Storage::disk('public')->path($image_path);
+            $image_url = asset(Storage::url($image_path));
             $validated_data['profile_photo'] = $image_url;
         }
 

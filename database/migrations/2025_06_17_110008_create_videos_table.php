@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('videos', function (Blueprint $table) {
             $table->id();
-            $table->text('description');
-            $table->time('duration');
+            $table->text('description')->nullable();
+            $table->time('duration')->nullable();
             $table->string('url');
             $table->string('title');
             $table->string('poster');

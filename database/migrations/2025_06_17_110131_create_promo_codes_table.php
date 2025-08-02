@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('promo_codes', function (Blueprint $table) {
             $table->id();
             $table->string('promo_code');
-            $table->integer('discount_percentage');
+            $table->integer('discount_percentage')->nullable()->default(0);
+            $table->integer('usage_limit')->nullable()->default(0);
+            $table->date('expires_in')->nullable();
             $table->foreignId('teacher_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });

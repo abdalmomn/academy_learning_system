@@ -12,7 +12,7 @@ class BannedUserService
 {
     public function ban_user(BannedUserDto $bannedUserDto): array
     {
-        // Ensure only supervisors can ban users
+        //only supervisors can ban users
         $currentUser = Auth::user();
         if (!$currentUser || !$currentUser->hasRole('supervisor')) {
             return [
@@ -22,7 +22,7 @@ class BannedUserService
             ];
         }
 
-        // Make sure the user exists
+        //check if user exists
         $targetUser = User::find($bannedUserDto->user_id);
         if (!$targetUser) {
             return [
@@ -32,7 +32,7 @@ class BannedUserService
             ];
         }
 
-        // Optional: prevent banning admins or supervisors
+        //no banning admins or supervisors
         if ($targetUser->hasRole('admin') || $targetUser->hasRole('supervisor')) {
             return [
                 'data' => null,
@@ -41,7 +41,7 @@ class BannedUserService
             ];
         }
 
-        // Prevent duplicate bans (optional)
+        //check if the ban is duplicate
         if (BannedUser::where('user_id', $bannedUserDto->user_id)->exists()) {
             return [
                 'data' => null,
@@ -50,7 +50,7 @@ class BannedUserService
             ];
         }
 
-        // Create the banned user record
+        //create banned user record
         $ban = BannedUser::create((array)$bannedUserDto);
 
         return [

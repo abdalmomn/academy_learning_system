@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('wallets', function (Blueprint $table) {
             $table->id();
-            $table->float('balance');
-            $table->enum('status',['active', 'suspended', 'disabled']);
+            $table->float('balance')->default(0.0);
+            $table->enum('status',['active', 'suspended', 'disabled'])->default('active');
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });

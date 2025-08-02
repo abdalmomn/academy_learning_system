@@ -32,7 +32,7 @@ class AuthenticationController extends Controller
         if ($request->hasFile('file_path')) {
             foreach ($request->file('file_path') as $file) {
                 $file_path = $file->store('certificates', 'public');
-                $file_url = Storage::disk('public')->path($file_path);
+                $file_url = asset(Storage::url($file_path));
                 $file_urls[] = $file_url;
             }
         }
@@ -40,9 +40,8 @@ class AuthenticationController extends Controller
 
 
         $signUpDto = SignUpDto::fromArray($data);
-            $signUpDto = SignUpDto::fromArray($request->validated());
-            $data = $this->authenticationService->sign_up($signUpDto);
-            return $this->Success($data['data'],$data['message']);
+        $data = $this->authenticationService->sign_up($signUpDto);
+        return $this->Success($data['data'],$data['message']);
     }
 
     public function sign_in(SignInRequest $request)

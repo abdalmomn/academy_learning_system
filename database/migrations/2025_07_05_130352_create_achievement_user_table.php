@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('achievement_id')->references('id')->on('achievements')->onDelete('cascade');
-            $table->integer('progress_percentage');
-            $table->boolean('is_done');
+            $table->integer('progress_percentage')->default(0);
+            $table->boolean('is_done')->default(false);
             $table->timestamps();
         });
     }

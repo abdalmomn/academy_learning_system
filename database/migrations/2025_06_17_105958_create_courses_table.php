@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('course_name');
             $table->text('description');
             $table->float('rating');
-            $table->enum('status',['draft', 'published', 'archived', 'pending_approval']);
+            $table->enum('status',['approved','draft', 'published', 'archived', 'pending_approval','rejected']);
             $table->boolean('is_paid');
             $table->date('start_date');
             $table->date('end_date');
