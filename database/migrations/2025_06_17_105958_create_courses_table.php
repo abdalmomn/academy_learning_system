@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('course_name');
             $table->text('description');
-            $table->float('rating');
+            $table->string('poster');
+            $table->float('rating')->default(0.0);
+            $table->float('price')->default(0.0);
             $table->enum('status',['approved','draft', 'published', 'archived', 'pending_approval','rejected']);
             $table->boolean('is_paid');
             $table->date('start_date');

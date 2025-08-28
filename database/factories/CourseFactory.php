@@ -25,12 +25,14 @@ class CourseFactory extends Factory
             'course_name' => $this->faker->sentence(3),
             'description' => $this->faker->paragraph(),
             'rating' => $this->faker->randomFloat(1, 1, 5),
+            'price' => $this->faker->randomFloat(1, 1, 1000000),
             'status' => $this->faker->randomElement(['draft', 'published', 'archived', 'pending_approval']),
             'is_paid' => $this->faker->boolean(),
             'start_date' => $this->faker->dateTimeBetween('-1 months', 'now')->format('Y-m-d'),
             'end_date' => $this->faker->dateTimeBetween('now', '+2 months')->format('Y-m-d'),
             'user_id' => User::factory(),
             'category_id' => Category::factory(),
+            'poster' => $this->faker->sentence(3),
         ];
     }
 }

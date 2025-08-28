@@ -51,4 +51,9 @@ class ProfileController extends Controller
         $data = $this->profileService->delete_account($request->input('password'));
         return $this->Success($data['data'],$data['message']);
     }
+    public function username()
+    {
+        $data = $this->profileService->get_user_name();
+        return $this->Success($data['data'],$data['message']);
+    }
 }

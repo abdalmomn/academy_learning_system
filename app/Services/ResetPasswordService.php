@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use App\Helper\generateResetTokenHelper;
+use App\Helper\generateTokenHelper;
 
 class ResetPasswordService
 {
@@ -36,9 +36,9 @@ class ResetPasswordService
 
         try {
         //to generate integer reset code between 100000 and 999999
-        $code = generateResetTokenHelper::generate_reset_code();
+        $code = generateTokenHelper::generate_code();
         //to create token that send to each next function to recognize who is the user? (replace the session)
-        $jwtToken = generateResetTokenHelper::generate_reset_token($checkEmailDto);
+        $jwtToken = generateTokenHelper::generate_reset_token($checkEmailDto);
         // Remove any existing code for this user
         ResetPassword::query()->where('email', $user->email)->delete();
         //create new record in resetPassword table with correct information
@@ -153,10 +153,10 @@ class ResetPasswordService
         DB::beginTransaction();
         try {
             //to generate integer reset code between 100000 and 999999
-            $code = generateResetTokenHelper::generate_reset_code();
+            $code = generateTokenHelper::generate_code();
             $tokenData = (object)['email' => $email];
             //to create token that send to each next function to recognize who is the user? (replace the session)
-            $jwtToken = generateResetTokenHelper::generate_reset_token($tokenData);
+            $jwtToken = generateTokenHelper::generate_reset_token($tokenData);
             // Remove any existing code for this user
             ResetPassword::query()->where('email', $email)->delete();
             //create new record in resetPassword table with correct information

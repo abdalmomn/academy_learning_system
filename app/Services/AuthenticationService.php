@@ -142,11 +142,10 @@ class AuthenticationService
                 }
 
                 //give the user his permissions
-                $user = $this->helper->appendRolesAndPermissions($user);
+//                $user = $this->helper->appendRolesAndPermissions($user);
                 //create token to the user when he logged in
                 $user['token'] = $user->createToken("authToken")->plainTextToken;
             }
-
         //save success login in log file
         Log::info('user logged in', [
             'username' => $user['username'],
@@ -168,7 +167,7 @@ class AuthenticationService
             ]);
             return [
                 'data' => null,
-                'message' => 'information not matching or account is not exist'
+                'message' => 'information not matching or account is not exist',
             ];
         }
     }

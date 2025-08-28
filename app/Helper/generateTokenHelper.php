@@ -2,9 +2,9 @@
 
 namespace App\Helper;
 
-class generateResetTokenHelper
+class generateTokenHelper
 {
-    public static function generate_reset_code(): int
+    public static function generate_code(): int
     {
         return str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
     }

@@ -6,11 +6,13 @@ use App\DTO\ApproveCourseDto;
 use App\Http\Requests\ApproveCourseRequest;
 use App\Http\Requests\StoreCourseRequest;
 use App\Dto\CourseDto;
+use App\Http\Requests\UpdateCourseRequest;
 use App\Services\CourseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\ResponseTrait;
+use Illuminate\Support\Facades\Storage;
 
 class CourseController extends Controller
 {
@@ -29,6 +31,11 @@ class CourseController extends Controller
         return $this->Success($data['data'], $data['message']);
     }
 
+    public function all_courses()
+    {
+        $data = $this->service->get_all_courses();
+        return $this->Success($data['data'],$data['message']);
+    }
     public function show($id)
     {
         $data = $this->service->getById($id);
@@ -49,14 +56,24 @@ class CourseController extends Controller
 
     public function store(StoreCourseRequest $request)
     {
-        $dto = CourseDto::fromArray($request->validated());
+        $validatedData = $request->validated();
+        if ($request->hasFile('poster')) {
+            $posterPath = $request->file('poster')->store('posters', 'public');
+            $validatedData['poster'] = asset(Storage::url($posterPath));
+        }
+        $dto = CourseDto::fromArray($validatedData);
         $data = $this->service->store($dto);
         return $this->Success($data['data'], $data['message']);
     }
 
-    public function update(StoreCourseRequest $request, $id)
+    public function update(UpdateCourseRequest $request, $id)
     {
-        $dto = CourseDto::fromArray($request->validated());
+        $validatedData = $request->validated();
+        if ($request->hasFile('poster')) {
+            $posterPath = $request->file('poster')->store('posters', 'public');
+            $validatedData['poster'] = asset(Storage::url($posterPath));
+        }
+        $dto = CourseDto::fromArray($validatedData);
         $data = $this->service->update($id, $dto);
         return $this->Success($data['data'], $data['message']);
     }

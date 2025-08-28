@@ -11,10 +11,37 @@ use App\Models\Video;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use function PHPUnit\Framework\isEmpty;
+
 class CourseService
 {
     public $video_helper;
     public function __construct(videoHelper $video_helper){$this->video_helper = $video_helper;}
+
+    public function get_all_courses(): array
+    {
+        $user = Auth::user();
+        if (!$user->hasRole('admin')){
+            return [
+                'data' => null,
+                'message' => 'must be a admin to see all teacher'
+            ];
+        }
+        $courses = Course::query()->select(
+                    'id','course_name','description','poster','rating', 'price'
+                    ,'status', 'is_paid', 'start_date', 'end_date','user_id','category_id')
+        ->get();
+        if ($courses->isEmpty()){
+            return [
+                'data' => null,
+                'message' => 'there is no courses right now'
+            ];
+        }
+        return [
+            'data' => $courses,
+            'message' => 'retrieve all courses successfully'
+        ];
+    }
 
     public function getAllActive()//done
     {
@@ -35,6 +62,12 @@ class CourseService
     {
         try {
             $course = Course::find($id);
+            if (!$course){
+                return [
+                    'data' => null,
+                    'message' => 'course not found'
+                ];
+            }
             $requirements = CourseRequirement::where('course_id', $course->id)->pluck('requirements');
             $course['requirements'] = $requirements;
 
@@ -55,7 +88,10 @@ class CourseService
             if (!$course) {
                 return ['data' => null, 'message' => 'Course not found'];
             }
-            return ['data' => $course, 'message' => 'Course details retrieved successfully'];
+            return ['data' => [
+                'course_details' => $course,
+                'videos' => $videos
+                ], 'message' => 'Course details retrieved successfully'];
         } catch (\Exception $e) {
             Log::error('Fetching course failed', ['error' => $e->getMessage(), 'id' => $id]);
             return ['data' => null, 'message' => 'Failed to fetch course'];
@@ -65,7 +101,13 @@ class CourseService
     public function getMyCourses()
     {
         try {
-            $courses = Course::where('user_id', Auth::id() )->get();
+            $user = auth()->user();
+
+            $courses = $user->courses()->withPivot(['is_completed', 'certificate_id'])
+                ->get();
+            if ($courses->isEmpty()){
+                return ['data' => null, 'message' => 'there is no courses right now'];
+            }
             return ['data' => $courses, 'message' => 'Your courses retrieved successfully'];
         } catch (\Exception $e) {
             Log::error('Fetching user courses failed', ['error' => $e->getMessage()]);
@@ -144,14 +186,17 @@ class CourseService
                 ->create([
                 'course_name' => $dto->course_name,
                 'description' => $dto->description,
-                'rating' => $dto->rating,
-                'status' => $dto->status,
+                'rating' => 0.0,
+                'price' => $dto->price,
+                'status' => 'pending_approval',
                 'is_paid' => $dto->is_paid,
                 'start_date' => $dto->start_date,
                 'end_date' => $dto->end_date,
                 'user_id' => Auth::id(),
                 'category_id' => $dto->category_id,
+                'poster' => $dto->poster,
             ]);
+            $course->refresh();
             //to set up the requirements of this course
             $requirements = request()->input('requirements', []); //array of strings
             foreach ($requirements as $req) {
@@ -168,7 +213,6 @@ class CourseService
             $course['requirements'] = $requirements;
             DB::commit();
             Log::info('Course created', ['id' => $course->id]);
-
             return [
                 'data' => $course,
                 'message' => 'Course created successfully, wait for approval'

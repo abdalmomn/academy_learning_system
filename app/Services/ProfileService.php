@@ -210,4 +210,22 @@ class ProfileService
             ];
         }
     }
+
+    public function get_user_name()
+    {
+        $user = User::query()
+            ->where('id',Auth::id())
+            ->select('username')
+            ->first();
+        if (!$user){
+            return [
+                'data' => null,
+                'message' => 'user not found'
+            ];
+        }
+        return [
+            'data' => $user,
+            'message' => 'username retrieved successfully'
+        ];
+    }
 }

@@ -5,11 +5,13 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\MakeSupervisorOrAdminAccountController;
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PromoCodeController;
 use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\TeacherRequestsController;
+use App\Http\Controllers\VerifyPinController;
 use App\Http\Controllers\VideoController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -64,8 +66,8 @@ Route::controller(ProfileController::class)
    Route::get('/my_profile' , 'show_my_profile_details');
    Route::get('/profile/{user_id}' , 'show_user_profile_details');
    Route::post('/profile/edit' , 'edit_profile');
-
    Route::post('/profile/delete' , 'delete_account');
+   Route::get('/username' , 'username');
 });
 
 });
@@ -74,7 +76,8 @@ Route::controller(ProfileController::class)
 Route::controller(CourseController::class)
     ->middleware('auth:sanctum')
     ->group(function () {
-    Route::get('getAllcourses',  'index');
+    Route::get('getAllActivecourses',  'index');
+    Route::get('get_all_courses',  'all_courses');
     Route::get('getCourseDetails/{id}',  'show');
     Route::get('getMy-courses',  'myCourses');
     Route::get('getEnded-courses',  'endedCourses');
@@ -85,6 +88,11 @@ Route::controller(CourseController::class)
     Route::delete('delete_requirement/{requirement_id}', 'delete_course_requirements');
     Route::get('pending-courses',  'pending_courses');
     Route::post('approve-course/{course_id}',  'approve_course');
+    });
+Route::controller(CourseController::class)
+    ->group(function () {
+        Route::get('getAllcourses',  'index');
+        Route::get('getCourseDetails/{id}',  'show');
     });
 
 
@@ -119,6 +127,18 @@ Route::controller(PromoCodeController::class)
     Route::delete('delete_promo_codes','delete_all_promo_codes');
 });
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+Route::controller(PaymentController::class)
+    ->middleware('auth:sanctum')->group(function (){
+   Route::get('checkout', 'checkout_page');
+   Route::post('payment', 'checkout');
+   Route::get('payment/success', 'stripe_success')->name('payment.success');
+   Route::get('payment/cancel', 'stripe_cancel')->name('payment.cancel');
+});
+
+
+Route::post('/verify_pin_code',[VerifyPinController::class,'verify_pin_code'])->middleware('auth:sanctum');
+
+//
+//Route::get('/user', function (Request $request) {
+//    return $request->user();
+//})->middleware('auth:sanctum');

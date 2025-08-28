@@ -2,7 +2,12 @@
 
 namespace App\Services;
 
+use App\Events\FamilyPinCode;
+use App\Helper\generateTokenHelper;
+use App\Models\PinCode;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 use App\Models\User;
 
@@ -35,6 +40,15 @@ class EmailVerificationService
 
         $user->markEmailAsVerified();
 
+
+        if ($user->hasRole('child')){
+            $code = generateTokenHelper::generate_code();
+            PinCode::query()->create([
+               'user_id' => $user->id,
+               'pin_code' => $code
+            ]);
+            Event::dispatch(new FamilyPinCode($user,$code));
+        }
         return [
             'status' => true,
             'message' => 'Email verified successfully',

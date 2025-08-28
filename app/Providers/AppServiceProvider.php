@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\SendPinCodeEmail;
 use App\Listeners\SendResetCodeEmail;
 use App\Listeners\SendVerificationEmail;
 use Illuminate\Support\Facades\Event;
@@ -31,5 +32,6 @@ class AppServiceProvider extends ServiceProvider
 
         Event::listen(SendVerificationEmail::class);
         Event::listen(SendResetCodeEmail::class);
+        Event::listen(SendPinCodeEmail::class);
     }
 }

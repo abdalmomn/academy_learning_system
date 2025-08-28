@@ -12,12 +12,14 @@ class Course extends Model
         'course_name',
         'description',
         'rating',
+        'price',
         'status',
         'is_paid',
         'start_date',
         'end_date',
         'user_id',
-        'category_id'
+        'category_id',
+        'poster'
     ];
 
 //    public function users()

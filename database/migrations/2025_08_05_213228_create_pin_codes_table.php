@@ -11,13 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transactions', function (Blueprint $table) {
+        Schema::create('pin_codes', function (Blueprint $table) {
             $table->id();
-            $table->decimal('amount',10,2);
-            $table->text('description');
-            $table->enum('status',['pending', 'completed', 'failed', 'refunded']);
-            $table->enum('transaction_type',['credit', 'debit']);
-            $table->enum('transaction_method',['points','stripe']);
+            $table->integer('pin_code')->nullable();
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
@@ -28,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('pin_codes');
     }
 };

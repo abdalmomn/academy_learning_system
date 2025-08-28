@@ -25,13 +25,13 @@ class StoreCourseRequest extends FormRequest
               return [
                   'course_name' => 'required|string|max:255',
                   'description' => 'required|string',
-                  'rating' => 'required|numeric|min:0|max:5',
-                  'status' => 'required|in:approved,draft,published,archived,pending_approval',
+                  'price' => 'required',
                   'is_paid' => 'required|boolean',
                   'start_date' => 'required|date',
                   'end_date' => 'required|date|after_or_equal:start_date',
                   'category_id' => 'required|exists:categories,id',
                   'requirements' => 'nullable|array',
+                  'poster' => 'required|file',
               ];
     }
 }
