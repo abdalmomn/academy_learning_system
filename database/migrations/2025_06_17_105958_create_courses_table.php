@@ -19,6 +19,7 @@ return new class extends Migration
             $table->float('rating')->default(0.0);
             $table->float('price')->default(0.0);
             $table->enum('status',['approved','draft', 'published', 'archived', 'pending_approval','rejected']);
+            $table->enum('type',['female','children']);
             $table->boolean('is_paid');
             $table->date('start_date');
             $table->date('end_date');

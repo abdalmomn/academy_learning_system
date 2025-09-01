@@ -4,6 +4,7 @@ namespace App\Services;
 use App\DTO\ApproveCourseDto;
 use App\Helper\videoHelper;
 use App\Jobs\ApproveScheduledCourseJob;
+use App\Models\Category;
 use App\Models\Course;
 use App\Dto\CourseDto;
 use App\Models\CourseRequirement;
@@ -46,12 +47,30 @@ class CourseService
     public function getAllActive()//done
     {
         try {
-            $courses = Course::where('status', 'published')->get();
-            if($courses->isempty()) {
-                return ['data' => null, 'message' => 'there is not Active courses '];
-            }else{
-                return ['data' => $courses, 'message' => 'Active courses retrieved successfully'];
+            $user = Auth::user();
+            $query = Course::where('status', 'published');
+            $type = null;
+            //courses for women
+            if ($user->hasRole('woman')){
+                $query->where('type', 'female');
+                $type = 'woman';
+            }                //courses for child
+        elseif ($user->hasRole('child')) {
+            $query->where('type', 'children');
+            $type = 'child';
+                 //courses for teacher and guest and supervisor
+            } elseif ($user->hasAnyRole(['guest', 'teacher', 'supervisor'])) {
+                $type = 'general';
+            } else {
+                return ['data' => null, 'message' => 'You do not have access to view courses'];
             }
+            $courses = $query->get();
+
+            if ($courses->isEmpty()) {
+                return ['data' => null, 'message' => "There are no active courses for $type"];
+            }
+            return ['data' => $courses, 'message' => "Active courses retrieved successfully for $type"];
+
         } catch (\Exception $e) {
             Log::error('Fetching active courses failed', ['error' => $e->getMessage()]);
             return ['data' => null, 'message' => 'Failed to fetch active courses'];
@@ -372,6 +391,35 @@ class CourseService
         } catch (\Exception $e) {
             Log::error('course approve failed', ['error' => $e->getMessage(), 'id' => $course_id]);
             return ['data' => null, 'message' => 'Failed to approve course'];
+        }
+    }
+    public function getCoursesByCategory($categoryId){
+        try {
+        $category = Category::find($categoryId);
+        if (!$category) {
+            return ['data' => null, 'message' => 'this category is not found'];
+        }
+        $user = Auth::user();
+        if (!$user) {
+            return ['data' => null, 'message' => 'unauthorized'];
+        }
+        $query = Course::where('category_id', $categoryId)->where('status', 'published');
+
+        if ($user->hasRole('woman')) {
+            $query->where('type', 'female');
+        } elseif ($user->hasRole('child')) {
+            $query->where('type', 'children');
+        }
+        $courses = $query->get();
+        if ($courses->isEmpty()) {
+            return ['data' => null, 'message' => 'There are not active courses for this category'];
+        }
+        return ['data' => $courses, 'message' => "Active courses retrieved successfully for category: $categoryId"];
+    }catch (\Exception $e) {
+         //add to log  file
+            Log::error('Fetching active courses failed', ['error' => $e->getMessage()]);
+            return ['data' => null, 'message' => 'Failed to fetch active courses'];
+
         }
     }
 }

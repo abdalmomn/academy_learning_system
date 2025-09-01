@@ -2,7 +2,10 @@
 
 use App\Http\Controllers\BannedUserController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\FaqCategoryController;
+use App\Http\Controllers\FaqController;
 use App\Http\Controllers\MakeSupervisorOrAdminAccountController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\PaymentController;
@@ -88,6 +91,9 @@ Route::controller(CourseController::class)
     Route::delete('delete_requirement/{requirement_id}', 'delete_course_requirements');
     Route::get('pending-courses',  'pending_courses');
     Route::post('approve-course/{course_id}',  'approve_course');
+    //filter for category
+    Route::get('/categories/{category-id}/courses',  'getCoursesByCategory');
+
     });
 Route::controller(CourseController::class)
     ->group(function () {
@@ -142,3 +148,45 @@ Route::post('/verify_pin_code',[VerifyPinController::class,'verify_pin_code'])->
 //Route::get('/user', function (Request $request) {
 //    return $request->user();
 //})->middleware('auth:sanctum');
+Route::controller(CommentController::class)
+    ->middleware('auth:sanctum')->group(function(){
+        Route::get('GetAllComments'        ,   'index');
+        Route::get('GetCommetById/{id}'   ,    'show');
+        Route::post('CreateComment'       ,   'store');
+        Route::post('UpdateComment/{id}'  ,  'update');
+        Route::delete('DeleteComment/{id}', 'destroy');
+        Route::post('videos/{id}/lock-comments',  'lockComments');
+        Route::post('videos/{id}/unlock-comments', 'unlockComments');
+    });
+
+// FAQ Categories
+
+Route::controller(FaqCategoryController::class)
+    ->middleware('auth:sanctum')->group(function(){
+        Route::get('GetAll_faq-categories', 'index');
+        Route::get('GetOne_faq-categories/{id}', 'show');
+        Route::post('Create_faq-categories',  'store'); // admin - supervisor
+        Route::post('Update_faq-categories/{id}', 'update'); // admin - supervisor
+        Route::delete('Delete_faq-categories/{id}','destroy'); // admin - supervisor
+
+    });
+
+// FAQs
+
+Route::controller(FaqCategoryController::class)
+    ->middleware('auth:sanctum')->group(function(){
+        Route::get('/faqs', 'index');
+        Route::get('/faqs/{id}', 'show');
+        Route::post('/faqs',  'store'); // admin - supervisor
+        Route::post('/faqs/{id}', 'update'); // admin - supervisor
+        Route::delete('/faqs/{id}',  'destroy'); // admin - supervisor
+
+    });
+
+
+    Route::get('/user', function (Request $request) {
+            return $request->user();
+        })->middleware('auth:sanctum');
+
+
+

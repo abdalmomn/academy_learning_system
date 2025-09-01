@@ -108,4 +108,10 @@ class CourseController extends Controller
         $data = $this->service->approve_update_course_status($dto,$course_id);
         return $this->Success($data['data'], $data['message']);
     }
+    public function getCoursesByCategory($categoryId)
+    {
+        $data = $this->service->getCoursesByCategory($categoryId);
+        return $this->Success($data['data'], $data['message']);
+
+    }
 }

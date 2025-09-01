@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('poster');
             $table->foreignId('course_id')->references('id')->on('courses')->onDelete('cascade');
+            $table->boolean('is_comments_locked')->default(false);
             $table->timestamps();
         });
     }
