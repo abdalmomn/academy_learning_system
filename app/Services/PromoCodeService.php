@@ -18,7 +18,7 @@ class PromoCodeService
         if (!$user->hasRole('supervisor')){
             return [
                 'data' => null,
-                'message' => 'must be a supervisor to update a course requirement'
+                'message' => 'must be a supervisor to create promo code'
             ];
         }
         try {
@@ -42,7 +42,7 @@ class PromoCodeService
         ]);
 
             return [
-                'data' => $promo_code,
+                'data' => null,
                 'message' => 'promo code created successfully'
             ];
         } catch (\Exception $e) {

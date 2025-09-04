@@ -19,10 +19,10 @@ return new class extends Migration
             $table->text('description');
             $table->date('start_date');
             $table->date('end_date');
-            $table->time('duration_minutes')->nullable();
+            $table->integer('duration_minutes')->nullable();
             $table->boolean('is_mandatory');
-            $table->foreignId('course_id')->references('id')->on('courses')->onDelete('cascade');
-            $table->foreignId('video_id')->references('id')->on('videos')->onDelete('cascade');
+            $table->foreignId('course_id')->nullable()->references('id')->on('courses')->onDelete('cascade');
+            $table->foreignId('video_id')->nullable()->references('id')->on('videos')->onDelete('cascade');
             $table->timestamps();
         });
     }

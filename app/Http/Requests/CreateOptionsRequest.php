@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CheckoutRequest extends FormRequest
+class CreateOptionsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,9 +22,9 @@ class CheckoutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'promo_code' => 'nullable|string|exists:promo_codes,promo_code',
-            'payment_method' => 'in:stripe,points',
-            'course_id' => 'required|integer|exists:courses,id',
+            'option_text' => 'required|string|max:500',
+            'is_correct'  => 'required|boolean',
+            'question_id' => 'required|exists:questions,id',
         ];
     }
 }

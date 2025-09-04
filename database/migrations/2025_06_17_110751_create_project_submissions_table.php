@@ -14,11 +14,10 @@ return new class extends Migration
         Schema::create('project_submissions', function (Blueprint $table) {
             $table->id();
             $table->string('file_path');
-            $table->enum('submission_type',['image','video']);
-            $table->integer('grade')->nullable();
-            $table->text('feedback')->nullable();
+//            $table->integer('grade')->nullable();
+//            $table->text('feedback')->nullable();
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreignId('question_id')->references('id')->on('questions')->onDelete('cascade');
+            $table->foreignId('exam_id')->references('id')->on('exams')->onDelete('cascade');
             $table->timestamps();
         });
     }

@@ -39,15 +39,49 @@ class ProfileService
     public function show_my_profile(): array
     {
         try {
-        $profile = $this->helper->fetch_profile(Auth::id());
-        if(!$profile){
-            return [
-                'data' => null,
-                'message' => 'there is an error, user not found'
-            ];
-        }
+            $profile = User::query()
+                ->where('id',Auth::id())
+                ->select('id','username', 'email', 'email_verified_at')
+                ->with('profile_details:first_name,last_name,date_of_birth,phone_number,profile_photo,user_id')
+                ->with('courses')
+                ->with('ratings')
+                ->with('academic_certificates')
+                ->first();
+            if(!$profile){
+                return [
+                    'data' => null,
+                    'message' => 'there is an error, user not found'
+                ];
+            }
+            if ($profile->hasRole(['child','woman'])){
+                unset($profile['academic_certificates']);
+                unset($profile['ratings']);
+            }
+//        $user['course_count'] = $user->courses->count();
 
-        return [
+            if ($profile->hasRole('teacher')){
+                $profile->load(['courses' => function($q) {
+                    $q->withCount('students');
+                }]);
+                $totalStudents = $profile->courses->sum('students_count');
+                $profile['total_students'] = $totalStudents-1;
+                $profile['student_who_rates'] = $profile->ratings->count('id') ?? 0;
+
+                $profile['total_rate'] = $profile['student_who_rates'] > 0
+                    ? $profile->ratings->sum('rate') / $profile['student_who_rates']
+                    : 0;
+            }else{
+                unset($profile->teacher_ratings_received);
+            }
+            unset($profile['roles']);
+            unset($profile['ratings']);
+            $profile->courses->each(function ($course) {
+                unset($course->pivot);
+            });
+
+
+            unset($profile->profile_details['user_id']);
+            return [
             'data' => $profile,
             'message' => 'get data successfully'
         ];
@@ -62,13 +96,61 @@ class ProfileService
     public function show_user_profile($user_id): array
     {
         try {
-            $profile = $this->helper->fetch_profile($user_id);
+            $teacher_profile = User::query()
+            ->where('id' , $user_id)
+            ->first();
+            if (!$teacher_profile->hasRole('teacher')){
+                return [
+                    'data' => null,
+                    'message' => 'only can show teachers profile'
+                ];
+            }
+            $profile = User::query()
+                ->where('id',$user_id)
+                ->select('id','username', 'email_verified_at')
+                ->with('profile_details:first_name,last_name,date_of_birth,profile_photo,user_id')
+                ->with('courses:id,course_name,description,poster,rating,price,status,is_paid,start_date,end_date')
+                ->with('ratings')
+                ->with('academic_certificates:id,file_path,description,teacher_id')
+                ->first();
             if(!$profile){
                 return [
                     'data' => null,
                     'message' => 'there is an error, user not found'
                 ];
             }
+            if ($profile->hasRole(['child','woman'])){
+                unset($profile['academic_certificates']);
+                unset($profile['ratings']);
+            }
+//        $user['course_count'] = $user->courses->count();
+
+            if ($profile->hasRole('teacher')){
+                $profile->load(['courses' => function($q) {
+                    $q->select('courses.id', 'courses.course_name', 'courses.description', 'courses.poster',
+                        'courses.rating', 'courses.price', 'courses.status', 'courses.is_paid',
+                        'courses.start_date', 'courses.end_date', 'courses.user_id')
+                        ->withCount('students');
+                }]);
+                $totalStudents = $profile->courses->sum('students_count');
+                $profile['total_students'] = $totalStudents-1;
+                $profile['student_who_rates'] = $profile->ratings->count('id') ?? 0;
+
+                $profile['total_rate'] = $profile['student_who_rates'] > 0
+                    ? $profile->ratings->sum('rate') / $profile['student_who_rates']
+                    : 0;
+            }else{
+                unset($profile->teacher_ratings_received);
+            }
+            unset($profile['roles']);
+            unset($profile['ratings']);
+            $profile->courses->each(function ($course) {
+                unset($course->pivot);
+            });
+            unset($profile->profile_details['user_id']);
+            $profile->academic_certificates->each(function ($certificate) {
+                unset($certificate->teacher_id);
+            });
             return [
                 'data' => $profile,
                 'message' => 'get data successfully'

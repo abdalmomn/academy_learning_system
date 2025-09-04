@@ -55,7 +55,7 @@ class AuthenticationService
         $user = $this->helper->give_and_load_permissions_and_roles($signUpDto->user_type,$user);
 
             if ($user->is_approved) {
-                Auth::login($user);
+//                Auth::login($user);
                 $user->token = $user->createToken("token")->plainTextToken;
             } else {
                 unset($user->token);
@@ -69,7 +69,6 @@ class AuthenticationService
 
         //create token to the user when he signed up
         $user['token'] = $user->createToken("token")->plainTextToken;
-
             //save success signup in log file
         Log::info( 'New user signed up', [
             'user_id' => $user->id,
@@ -81,13 +80,11 @@ class AuthenticationService
 
         return [
             'data' => $signUpDto->user_type == 'teacher'
-                ? ['user' => $user , 'academic_certificates' => $certificates ]
+                ? ['user' => $user ]
                 : $user,
             'message' => $user->is_approved
                 ? 'Signed up successfully.'
                 : 'Your account is pending admin approval.'
-//            'data' => $user,
-//            'message' => 'signed up successfully'
         ];
         }catch(Exception $e){
             DB::rollBack();
@@ -142,7 +139,7 @@ class AuthenticationService
                 }
 
                 //give the user his permissions
-//                $user = $this->helper->appendRolesAndPermissions($user);
+                $user = $this->helper->appendRolesAndPermissions($user);
                 //create token to the user when he logged in
                 $user['token'] = $user->createToken("authToken")->plainTextToken;
             }

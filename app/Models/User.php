@@ -103,7 +103,7 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPassword
 
 
     // Ratings this user (as a teacher) received
-    public function teacher_ratings_received()
+    public function ratings()
     {
         return $this->hasMany(TeacherRating::class, 'teacher_id');
     }
@@ -121,6 +121,12 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPassword
     {
         return $this->hasOne(Enthusiasm::class);
     }
+    public function attendances()
+    {
+        return $this->hasMany(UserAttendance::class, 'user_id');
+    }
+
+
     public function examResult()
     {
         return $this->hasOne(ExamResult::class);

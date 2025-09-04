@@ -6,11 +6,15 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\FaqCategoryController;
 use App\Http\Controllers\FaqController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExamController;
 use App\Http\Controllers\MakeSupervisorOrAdminAccountController;
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\OptionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PromoCodeController;
+use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\TeacherRequestsController;
@@ -79,9 +83,6 @@ Route::controller(ProfileController::class)
 Route::controller(CourseController::class)
     ->middleware('auth:sanctum')
     ->group(function () {
-    Route::get('getAllActivecourses',  'index');
-    Route::get('get_all_courses',  'all_courses');
-    Route::get('getCourseDetails/{id}',  'show');
     Route::get('getMy-courses',  'myCourses');
     Route::get('getEnded-courses',  'endedCourses');
     Route::post('createCourse', 'store');
@@ -94,18 +95,19 @@ Route::controller(CourseController::class)
     //filter for category
     Route::get('/categories/{category-id}/courses',  'getCoursesByCategory');
 
+    Route::get('get_all_courses',  'all_courses');
+    Route::post('attendance_register',  'attendance_register');
     });
 Route::controller(CourseController::class)
     ->group(function () {
-        Route::get('getAllcourses',  'index');
         Route::get('getCourseDetails/{id}',  'show');
+        Route::get('getAllActivecourses',  'index');
     });
 
 
 
 Route::controller(CategoryController::class)->group(function () {
     Route::get('getAllCategory', 'index');
-    Route::get('getCategoryDetails/{category}', 'show');
     Route::post('CreateCategory', 'store');
     Route::post('UpdateCategory/{category}', 'update');
     Route::delete('DeleteCategory/{category}', 'destroy');
@@ -122,6 +124,7 @@ Route::controller(VideoController::class)
    Route::post('update_video/{course_id}/{video_id}' , 'update_video');
    Route::delete('delete_video/{course_id}/{video_id}' , 'delete_video');
    Route::get('show_video/{video_id}' , 'show_video');
+   Route::get('show_videos_by_course/{course_id}' , 'show_videos_by_course');
     });
 
 Route::controller(PromoCodeController::class)
@@ -189,4 +192,41 @@ Route::controller(FaqCategoryController::class)
         })->middleware('auth:sanctum');
 
 
+
+Route::controller(ExamController::class)
+    ->middleware('auth:sanctum')->group(function(){
+        Route::post('create_exam' , 'create_exam');
+        Route::get('show_exam/{exam_id}' , 'show_exam');
+        Route::get('show_exam_by_course/{course_id}' , 'show_exams_by_course');
+        Route::get('show_all_exams' , 'show_all_exams');
+        Route::post('update_exam/{exam_id}' , 'update_exam');
+        Route::delete('delete_exam/{exam_id}' , 'delete_exam');
+        Route::post('store_exam_answer' , 'store_exam_answer');
+        Route::get('get_exam_result/{exam_id}' , 'get_exam_result');
+        Route::get('certificate' , 'certificate');
+        Route::post('submit_project_answer' , 'submit_project_by_students');
+    });
+
+Route::controller(QuestionController::class)
+    ->middleware('auth:sanctum')->group(function(){
+        Route::post('create_question' , 'create_question');
+        Route::post('update_question/{question_id}' , 'update_question');
+        Route::get('show_question/{question_id}' , 'show_question');
+        Route::delete('delete_question/{question_id}' , 'delete_question');
+    });
+Route::controller(OptionController::class)
+    ->middleware('auth:sanctum')->group(function(){
+        Route::post('create_option' , 'create_option');
+        Route::post('update_option/{option_id}' , 'update_option');
+        Route::delete('delete_option/{option_id}' , 'delete_option');
+        Route::get('show_option_by_question/{question_id}' , 'show_option_by_question');
+    });
+
+Route::controller(DashboardController::class)
+    ->middleware('auth:sanctum')->group(function(){
+        Route::get('show_all_users' , 'show_all_users');
+        Route::get('show_all_teachers' , 'show_all_teachers');
+        Route::get('show_all_students' , 'show_all_students');
+        Route::get('show_all_supervisors' , 'show_all_supervisors');
+    });
 

@@ -30,10 +30,10 @@ class Video extends Model
     {
         return $this->belongsToMany(User::class, 'user_video')->withTimestamps();
     }
-    public function attendedUsers()
+    public function attendances()
     {
-        return $this->belongsToMany(User::class, 'user_attendance')
-            ->withPivot('is_attendance')
-            ->withTimestamps();
+        return $this->hasMany(UserAttendance::class, 'video_id');
     }
+
+
 }

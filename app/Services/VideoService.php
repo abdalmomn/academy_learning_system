@@ -5,6 +5,7 @@ namespace App\Services;
 use App\DTO\VideoDto;
 use App\Helper\videoHelper;
 use App\Models\Course;
+use App\Models\UserAttendance;
 use App\Models\Video;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -54,6 +55,72 @@ class VideoService
             return [
                 'data' => null,
                 'message' => 'fail to add video.'
+            ];
+        }
+    }
+
+    public function show_videos_by_course($course_id): array
+    {
+        try {
+            $course = Course::find($course_id);
+            if (!$course) {
+                return [
+                    'data' => null,
+                    'message' => 'course not found'
+                ];
+            }
+
+            $videos = Video::query()
+                ->where('course_id', $course->id)
+                ->select('id','title', 'duration', 'url' , 'poster')
+                ->get();
+
+            if ($videos->isEmpty()){
+                return [
+                    'data' => null,
+                    'message' => 'there is no videos for this course'
+                ];
+            }
+
+            $user_id = auth()->id();
+
+            if ((float)$course->price === 0.0) {
+                if (!$user_id) {
+                    return [
+                        'data' => null,
+                        'message' => 'You must be logged in to access this free course.'
+                    ];
+                }
+
+                $videoIds = $videos->pluck('id')->all();
+
+                $totalVideos = count($videoIds);
+
+                $attended = UserAttendance::where('user_id', $user_id)
+                    ->whereIn('video_id', $videoIds)
+                    ->where('is_attendance', true)
+                    ->distinct('video_id')
+                    ->count('video_id');
+
+                $absences = $totalVideos - $attended;
+
+                if ($attended > 0 && $absences > 3) {
+                    return [
+                        'data' => null,
+                        'message' => 'You are not allowed to access this course due to excessive absences.'
+                    ];
+                }
+            }
+
+            return [
+                'data' => $videos,
+                'message' => 'videos retrieved successfully'
+            ];
+        } catch (\Exception $e) {
+            Log::error('Fetching course videos failed', ['error' => $e->getMessage(), 'course_id' => $course_id]);
+            return [
+                'data' => null,
+                'message' => 'Failed to fetch videos'
             ];
         }
     }
@@ -152,7 +219,9 @@ class VideoService
     public function show_video($video_id):array
     {
         try {
-            $video = Video::query()->find($video_id);
+            $video = Video::query()
+                ->select('id', 'title', 'description', 'url' , 'duration', 'poster')
+                ->find($video_id);
             if (!$video) {
                 return [
                     'data' => null,
