@@ -8,6 +8,8 @@ use App\Models\Category;
 use App\Models\Course;
 use App\Dto\CourseDto;
 use App\Models\CourseRequirement;
+use App\Models\User;
+use App\Models\UserAttendance;
 use App\Models\Video;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -28,10 +30,22 @@ class CourseService
                 'message' => 'must be a admin to see all teacher'
             ];
         }
-        $courses = Course::query()->select(
-                    'id','course_name','description','poster','rating', 'price'
-                    ,'status', 'is_paid', 'start_date', 'end_date','user_id','category_id')
-        ->get();
+        $courses = Course::query()
+            ->with('user:id,username')
+            ->select(
+                'id','course_name','description','poster','rating',
+                'price','status','is_paid','user_id','start_date',
+                'end_date'
+            )
+            ->get();
+        foreach ($courses as $course) {
+            $teacher_name = User::query()
+            ->where('id', $course->user_id)
+            ->select(['username as teacher_name'])
+            ->first();
+            $course['teacher_name'] = $teacher_name;
+            unset($course['user']);unset($course['user_id']);
+        }
         if ($courses->isEmpty()){
             return [
                 'data' => null,
@@ -50,19 +64,30 @@ class CourseService
             $user = Auth::user();
             $query = Course::where('status', 'published');
             $type = null;
-            //courses for women
             if ($user->hasRole('woman')){
                 $query->where('type', 'female');
                 $type = 'woman';
-            }                //courses for child
+            }
+            //courses for child
         elseif ($user->hasRole('child')) {
             $query->where('type', 'children');
             $type = 'child';
+
                  //courses for teacher and guest and supervisor
             } elseif ($user->hasAnyRole(['guest', 'teacher', 'supervisor'])) {
                 $type = 'general';
             } else {
                 return ['data' => null, 'message' => 'You do not have access to view courses'];
+            }
+            $courses = Course::where('status', 'published')
+                ->select('id', 'course_name','description' , 'poster', 'price', 'rating','is_paid', 'status','user_id')
+                ->get();
+            foreach ($courses as $course){
+                $course['teacher_name'] = User::query()->select(['username as teacher_name'])->where('id', $course->user_id)->first();
+                unset($course['user_id']);
+            }
+            if($courses->isempty()) {
+                return ['data' => null, 'message' => 'there is not Active courses '];
             }
             $courses = $query->get();
 
@@ -77,24 +102,27 @@ class CourseService
         }
     }
 
-    public function getById($id)//done
+    public function getById($id)
     {
         try {
             $course = Course::find($id);
-            if (!$course){
+            if (!$course) {
                 return [
                     'data' => null,
                     'message' => 'course not found'
                 ];
             }
+
             $requirements = CourseRequirement::where('course_id', $course->id)->pluck('requirements');
             $course['requirements'] = $requirements;
 
-            $videos = Video::query()
-                ->where('course_id',$course->id)
-                ->get();
-            $courseTotalDurationSeconds = 0;
+            $teacher_name = User::query()
+                ->where('id', $course->user_id)
+                ->select(['username as teacher_name'])
+                ->first();
 
+            $videos = Video::query()->where('course_id',$course->id)->get();
+            $courseTotalDurationSeconds = 0;
             foreach ($videos as $video){
                 $courseTotalDurationSeconds += $this->video_helper->hmsToSeconds($video->duration);
             }
@@ -103,36 +131,69 @@ class CourseService
             $course['videos_count'] = $videos->count();
             $user_count = $course->user()->count();
             $course['users_count'] = $user_count - 1;
+            $category = Category::query()->find($course->category_id);
+            $course['category_name'] = $category->category_name;
+            unset($course['user_id'], $course['category_id'], $course['created_at'], $course['updated_at']);
 
-            if (!$course) {
-                return ['data' => null, 'message' => 'Course not found'];
-            }
-            return ['data' => [
-                'course_details' => $course,
-                'videos' => $videos
-                ], 'message' => 'Course details retrieved successfully'];
+            return [
+                'data' => [
+                    'course_details' => [$course, $teacher_name],
+                ],
+                'message' => 'Course details retrieved successfully'
+            ];
         } catch (\Exception $e) {
             Log::error('Fetching course failed', ['error' => $e->getMessage(), 'id' => $id]);
             return ['data' => null, 'message' => 'Failed to fetch course'];
         }
     }
 
+
     public function getMyCourses()
     {
         try {
             $user = auth()->user();
+            $courses = $user->courses()
+                ->select('courses.id','courses.course_name','courses.description',
+                    'courses.poster','courses.price','courses.rating','courses.status','courses.user_id')
+                ->withPivot(['is_completed'])
+                ->get()
+                ->map(function ($course) {
+                    $teacher_name = User::query() ->where('id', $course->user_id) ->select(['username as teacher_name']) ->first();
 
-            $courses = $user->courses()->withPivot(['is_completed', 'certificate_id'])
-                ->get();
-            if ($courses->isEmpty()){
-                return ['data' => null, 'message' => 'there is no courses right now'];
+                    return [
+                        'id' => $course->id,
+                        'course_name' => $course->course_name,
+                        'description' => $course->description,
+                        'poster' => $course->poster,
+                        'price' => $course->price,
+                        'rating' => $course->rating,
+                        'status' => $course->status,
+                        'teacher_name' => $teacher_name,
+                        'is_completed' => $course->pivot->is_completed,
+                    ];
+                });
+
+            if ($courses->isEmpty()) {
+                return [
+                    'data' => null,
+                    'message' => 'there is no courses right now'
+                ];
             }
-            return ['data' => $courses, 'message' => 'Your courses retrieved successfully'];
+
+            return [
+                'data' => $courses,
+                'message' => 'Your courses retrieved successfully'
+            ];
+
         } catch (\Exception $e) {
             Log::error('Fetching user courses failed', ['error' => $e->getMessage()]);
-            return ['data' => null, 'message' => 'Failed to fetch your courses'];
+            return [
+                'data' => null,
+                'message' => 'Failed to fetch your courses'
+            ];
         }
     }
+
 
     public function getEndedCourses()//done
     {
@@ -144,7 +205,13 @@ class CourseService
             ];
         }
         try {
-            $courses = Course::where('end_date', '<', now()->toDateString())->get();
+            $courses = Course::where('end_date', '<', now()->toDateString())
+                ->select('id', 'course_name','description' , 'poster', 'price', 'rating','is_paid', 'status','user_id')
+                ->get();
+            foreach ($courses as $course){
+                $course['teacher_name'] = User::query()->select(['username as teacher_name'])->where('id', $course->user_id)->first();
+                unset($course['user_id']);
+            }
             if($courses->isempty()) {
                 return ['data' => null, 'message' => 'there is not  courses today '];
             }else{
@@ -276,11 +343,17 @@ class CourseService
         if (!$user->hasRole('supervisor')){
             return [
                 'data' => null,
-                'message' => 'must be a teacher to update a course requirement'
+                'message' => 'must be a teacher to show pending courses'
             ];
         }
         try {
-            $courses = Course::where('status', '=', 'pending_approval')->get();
+            $courses = Course::where('status', '=', 'pending_approval')
+                ->select('id', 'course_name','description' , 'poster', 'price', 'rating','is_paid', 'status','user_id')
+                ->get();
+            foreach ($courses as $course){
+                $course['teacher_name'] = User::query()->select(['username as teacher_name'])->where('id', $course->user_id)->first();
+                unset($course['user_id']);
+            }
             if($courses->isempty()) {
                 return ['data' => null, 'message' => 'there is not  courses right now'];
             }else{
@@ -422,4 +495,37 @@ class CourseService
 
         }
     }
+
+    public function attendance_register($request): array
+    {
+        $user_id = auth()->id();
+        $request['is_attendance'] = true;
+
+        $video = Video::with('course')->findOrFail($request['video_id']);
+        $course = $video->course;
+
+        if ($course->price > 0) {
+            return [
+                'data' => null,
+                'message' => 'Attendance is only required for free courses.'
+            ];
+        }
+
+        $attendance = UserAttendance::updateOrCreate(
+            [
+                'user_id' => $user_id,
+                'video_id' => $request['video_id'],
+            ],
+            [
+                'is_attendance' => true,
+            ]
+        );
+        unset($attendance['updated_at']); unset($attendance['created_at']);
+        return [
+            'data' => $attendance,
+            'message' => 'Attendance registered successfully.'
+        ];
+    }
+
+
 }

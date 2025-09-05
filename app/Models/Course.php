@@ -37,6 +37,12 @@ class Course extends Model
     {
         return $this->belongsTo(Category::class,'category_id');
     }
+    public function students()
+    {
+        return $this->belongsToMany(User::class, 'user_courses', 'course_id', 'user_id')
+            ->withTimestamps();
+    }
+
     public function rate()
     {
         return $this->hasMany(CourseRating::class);

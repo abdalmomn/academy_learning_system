@@ -12,6 +12,9 @@
             {
                 try {
                     $categories = Category::all();
+                    foreach ($categories as $category){
+                        unset($category['created_at']); unset($category['updated_at']);
+                    }
                     if($categories->isEmpty()){   //check if categories is found
                     return [
                         'data' => null,
@@ -28,34 +31,6 @@
                     return [
                         'data' => null,
                         'message' => 'Failed to fetch categories'
-                    ];
-                }
-            }
-
-            public function getById($id)    //get one category with details
-            {
-                try {
-                    $category = Category::find($id);    //check if categories is found
-                    if(!$category) {
-                        return [
-                            'data' => null,
-                            'message' => 'this Category not found'
-                        ];
-                    }else{
-                        return [
-                            'data' => $category,
-                            'message' => 'Category details'
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    // save failed get by id in log file
-                    Log::error('Fetching category failed', [
-                        'error' => $e->getMessage(),
-                        'id' => $id
-                    ]);
-                    return [
-                        'data' => null,
-                        'message' => 'Failed to fetch category'
                     ];
                 }
             }

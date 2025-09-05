@@ -26,13 +26,6 @@ class CategoryController extends Controller
         return $this->Success($data['data'], $data['message']);
     }
 
-    public function show($id)
-    {
-        $data = $this->service->getById($id);
-        return $this->Success($data['data'], $data['message']);
-    }
-
-
     public function store(StoreCategoryRequest $request)
     {
         $dto = CategoryDto::fromArray($request->validated());

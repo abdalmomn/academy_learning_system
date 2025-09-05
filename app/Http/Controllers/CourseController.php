@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DTO\ApproveCourseDto;
 use App\Http\Requests\ApproveCourseRequest;
+use App\Http\Requests\AttendanceRegisterRequest;
 use App\Http\Requests\StoreCourseRequest;
 use App\Dto\CourseDto;
 use App\Http\Requests\UpdateCourseRequest;
@@ -18,7 +19,7 @@ class CourseController extends Controller
 {
     use ResponseTrait;
 
-    private CourseService $service;
+    private $service;
 
     public function __construct(CourseService $service)
     {
@@ -114,4 +115,11 @@ class CourseController extends Controller
         return $this->Success($data['data'], $data['message']);
 
     }
+
+    public function attendance_register(AttendanceRegisterRequest $request)
+    {
+        $data = $this->service->attendance_register($request->validated());
+        return $this->Success($data['data'], $data['message']);
+    }
+
 }

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTO\PaymentDto;
+use App\Models\Category;
 use App\Models\Course;
 use App\Models\PromoCode;
 use App\Models\Transaction;
@@ -22,8 +23,14 @@ class CheckoutService
     {
         $course = Course::query()
             ->where('id',$request['course_id'])
-            ->select('id','course_name','description','start_date','end_date','user_id','category_id')
+            ->select('id','course_name','description', 'price','start_date','end_date','user_id','category_id')
             ->first();
+        $course['teacher_name'] = User::query()
+            ->where('id', $course->user_id)
+            ->select(['username as teacher_name'])
+            ->first();
+        $category = Category::query()->find($course->category_id);
+        $course['category_name'] = $category->category_name;
         $user = User::query()
             ->where('id',Auth::id())
             ->select('id','username','email')
@@ -32,12 +39,12 @@ class CheckoutService
             ->where('user_id',Auth::id())
             ->select('id','balance')
             ->first();
+        unset($course['user_id']);unset($course['category_id']);
         Log::info('checkout page fetched data successfully', [
             'course' => $course,
             'user' => $user,
             'wallet' => $wallet
         ]);
-
         if (!$user || !$course || !$wallet){
             Log::warning('checkout page missing data', [
                 'user' => $user,
@@ -89,7 +96,20 @@ class CheckoutService
                 'message' => 'course not found'
             ];
         }
-        $wallet = Wallet::query()
+        if ($course->price == 0){
+            if (!$course->user()->where('user_id', $user_id)->exists()) {
+                $course->user()->attach($user_id, [
+                    'is_completed' => false,
+                    'certificate_id' => null
+                ]);
+            };
+            return [
+                'data' => null,
+                'message' => 'enrolled in course successfully'
+            ];
+        }
+
+            $wallet = Wallet::query()
                 ->where('user_id',$user_id)
                 ->first();
         $initial_price = $course->price;
@@ -213,6 +233,7 @@ class CheckoutService
                 'certificate_id' => null
             ]);
         }
+
         Log::info('checkout success with stripe', [
             'user_id' => $user_id,
             'course_id' => $course->id]

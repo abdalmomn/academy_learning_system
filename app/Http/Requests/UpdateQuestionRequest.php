@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CheckoutRequest extends FormRequest
+class UpdateQuestionRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,9 +22,10 @@ class CheckoutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'promo_code' => 'nullable|string|exists:promo_codes,promo_code',
-            'payment_method' => 'in:stripe,points',
-            'course_id' => 'required|integer|exists:courses,id',
+            'question_text' => ['string', 'max:65535'],
+            'question_type' => ['in:mcq,project'],
+            'mark'          => ['integer', 'min:1'],
+            'exam_id'       => ['exists:exams,id'],
         ];
     }
 }

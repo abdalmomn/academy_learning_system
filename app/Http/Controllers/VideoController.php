@@ -24,7 +24,7 @@ class VideoController extends Controller
         $validatedData = $request->validated();
         if ($request->hasFile('url')) {
             $videoPath = $request->file('url')->store('videos', 'public');
-            $validatedData['url'] = asset(Storage::url($videoPath));
+            $validatedData['url'] = Storage::url($videoPath);
 
             $duration = $this->videoHelper->getVideoDuration(Storage::disk('public')->path($videoPath));
             $validatedData['duration'] = $duration;
@@ -33,7 +33,7 @@ class VideoController extends Controller
 
         if ($request->hasFile('poster')) {
             $posterPath = $request->file('poster')->store('posters', 'public');
-            $validatedData['poster'] = asset(Storage::url($posterPath));
+            $validatedData['poster'] = Storage::url($posterPath);
         }
 
         $dto = VideoDto::fromArray($validatedData);
@@ -68,6 +68,10 @@ class VideoController extends Controller
 
     public function show_video($video_id){
         $data = $this->videoService->show_video($video_id);
+        return $this->Success($data['data'],$data['message']);
+    }
+    public function show_videos_by_course($course_id){
+        $data = $this->videoService->show_videos_by_course($course_id);
         return $this->Success($data['data'],$data['message']);
     }
 }

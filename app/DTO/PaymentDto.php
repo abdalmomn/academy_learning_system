@@ -14,7 +14,7 @@ class PaymentDto
     {
         return new self(
             promo_code: $data['promo_code'] ?? null,
-            payment_method: $data['payment_method'],
+            payment_method: $data['payment_method'] ?? 'points',
             course_id: $data['course_id']
         );
     }

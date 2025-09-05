@@ -17,7 +17,7 @@ return new class extends Migration
             $table->time('duration')->nullable();
             $table->string('url');
             $table->string('title');
-            $table->string('poster');
+            $table->string('poster')->nullable();
             $table->foreignId('course_id')->references('id')->on('courses')->onDelete('cascade');
             $table->boolean('is_comments_locked')->default(false);
             $table->timestamps();
