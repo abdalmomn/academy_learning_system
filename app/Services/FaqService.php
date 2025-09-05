@@ -12,7 +12,7 @@ class FaqService
     public function getAll()
     {
         try {
-            $faqs = Faq::with('category')->latest()->get();
+            $faqs = Faq::latest()->get();
             return [
                 'data' => $faqs,
                 'message' => $faqs->isEmpty() ? 'No FAQs found' : 'All FAQs'
@@ -26,7 +26,7 @@ class FaqService
     public function getById($id)
     {
         try {
-            $faq = Faq::with('category')->find($id);
+            $faq = Faq::find($id);
             return [
                 'data' => $faq,
                 'message' => $faq ? 'FAQ details' : 'FAQ not found'
@@ -40,8 +40,8 @@ class FaqService
     public function store(FaqDTO $dto)
     {
         $user = Auth::user();
-        if (!$user || !in_array($user->role, ['admin', 'supervisor'])) {
-            return ['data' => null, 'message' => 'Unauthorized - admin or supervisor only'];
+        if (!$user ||!$user->hasRole( ['admin', 'supervisor'])) {
+            return ['data' => null, 'message' => 'Unauthorized - admin or supervisor only',300];
         }
 
         DB::beginTransaction();
@@ -64,7 +64,7 @@ class FaqService
     public function update($id, FaqDTO $dto)
     {
         $user = Auth::user();
-        if (!$user || !in_array($user->role, ['admin', 'supervisor'])) {
+        if (!$user || !$user->hasRole( ['admin', 'supervisor'])) {
             return ['data' => null, 'message' => 'Unauthorized - admin or supervisor only'];
         }
 
@@ -93,7 +93,7 @@ class FaqService
     public function delete($id)
     {
         $user = Auth::user();
-        if (!$user || !in_array($user->role, ['admin', 'supervisor'])) {
+        if (!$user || !$user->hasRole( ['admin', 'supervisor'])) {
             return ['data' => null, 'message' => 'Unauthorized - admin or supervisor only'];
         }
 

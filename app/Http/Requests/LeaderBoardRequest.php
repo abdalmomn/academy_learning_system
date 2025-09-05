@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateCommentRequest extends FormRequest
+class LeaderBoardRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,9 @@ class UpdateCommentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'comment' => 'required|string|max:500',
-            'video_id' => 'required|integer|exists:videos,id',
+            'leader_id'   => 'required|exists:users,id',
+            'leader_type' => 'required|string',
+            'points'      => 'nullable|integer|min:0'
         ];
     }
 }

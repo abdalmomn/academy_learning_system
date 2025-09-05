@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateCommentRequest;
 use App\ResponseTrait;
 use App\Services\CommentService;
 use App\Models\Comment;
+use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
@@ -20,9 +21,9 @@ class CommentController extends Controller
         $this->service = $service;
     }
 
-    public function index()
+    public function index($videoId)
     {
-        $data = $this->service->getAll();
+        $data = $this->service->getByVideo($videoId);
         return $this->Success($data['data'], $data['message']);
     }
 
@@ -34,25 +35,37 @@ class CommentController extends Controller
 
     public function store(CreateCommentRequest $request)
     {
-        $dto = CommentDTO::fromArray($request);
+        $dto = CommentDTO::fromArray($request->validated());
         $data = $this->service->create($dto);
         return $this->Success($data['data'], $data['message']);
     }
 
     public function update(UpdateCommentRequest $request, $id)
     {
+        $validated = $request->validated();
+
         $dto = new CommentDTO(
-            $request->comment,
+            $validated['comment'],
             $request->user()->id,
-            $request->video_id ?? null
+            $validated['video_id']
         );
+
         $data = $this->service->update($id, $dto);
+
         return $this->Success($data['data'], $data['message']);
     }
 
-    public function destroy($id)
+    public function destroy($videoid,$id)
     {
-        $data = $this->service->delete($id);
+        $request = request();
+        $request->merge(['video_id' => $videoid]);
+
+        $request->validate([
+            'video_id' => 'required|integer|exists:videos,id'
+        ]);
+
+        $data = $this->service->delete($id,$videoid);
+
         return $this->Success($data['data'], $data['message']);
     }
     public function lockComments($id)

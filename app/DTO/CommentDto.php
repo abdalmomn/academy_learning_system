@@ -14,7 +14,7 @@ class CommentDto
     {
         return new self(
             comment:  $data['comment'],
-            user_id:  $data['user_id'],
+            user_id:  auth()->id(),
             video_id:  $data['video_id']
         );
     }

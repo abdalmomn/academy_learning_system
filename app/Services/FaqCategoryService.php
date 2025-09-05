@@ -2,6 +2,7 @@
 
 namespace App\Services;
 use App\DTO\FaqCategoryDTO;
+use App\Models\Faq_categories;
 use App\Models\FaqCategory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +15,7 @@ class FaqCategoryService
     public function getAll()
     {
         try {
-            $categories = FaqCategory::latest()->get();
+            $categories = Faq_categories::latest()->get();
             return [
                 'data' => $categories,
                 'message' => $categories->isEmpty() ? 'No FAQ categories found' : 'All FAQ categories'
@@ -28,7 +29,7 @@ class FaqCategoryService
     public function getById($id)
     {
         try {
-            $category = FaqCategory::with('faqs')->find($id);
+            $category = Faq_categories::with('faq')->find($id);
             return [
                 'data' => $category,
                 'message' => $category ? 'FAQ Category details' : 'FAQ Category not found'
@@ -42,13 +43,13 @@ class FaqCategoryService
     public function store(FaqCategoryDTO $dto)
     {
         $user = Auth::user();
-        if (!$user || !in_array($user->role, ['admin', 'supervisor'])) {
+        if (!$user || !$user->hasRole( ['admin', 'supervisor'])) {
             return ['data' => null, 'message' => 'Unauthorized - admin or supervisor only'];
         }
 
         DB::beginTransaction();
         try {
-            $category = FaqCategory::create(['faq_category_name' => $dto->faq_category_name]);
+            $category = Faq_categories::create(['faq_category_name' => $dto->faq_category_name]);
             DB::commit();
             Log::info('FAQ category created', ['id' => $category->id]);
 
@@ -63,13 +64,13 @@ class FaqCategoryService
     public function update($id, FaqCategoryDTO $dto)
     {
         $user = Auth::user();
-        if (!$user || !in_array($user->role, ['admin', 'supervisor'])) {
+        if (!$user || !$user->hasRole( ['admin', 'supervisor'])) {
             return ['data' => null, 'message' => 'Unauthorized - admin or supervisor only'];
         }
 
         DB::beginTransaction();
         try {
-            $category = FaqCategory::find($id);
+            $category = Faq_categories::find($id);
             if (!$category) {
                 return ['data' => null, 'message' => 'FAQ category not found'];
             }
@@ -88,13 +89,13 @@ class FaqCategoryService
     public function delete($id)
     {
         $user = Auth::user();
-        if (!$user || !in_array($user->role, ['admin', 'supervisor'])) {
+        if (!$user || !$user->hasRole( ['admin', 'supervisor'])) {
             return ['data' => null, 'message' => 'Unauthorized - admin or supervisor only'];
         }
 
         DB::beginTransaction();
         try {
-            $category = FaqCategory::find($id);
+            $category = Faq_categories::with('faq')->find($id);
             if (!$category) {
                 return ['data' => null, 'message' => 'FAQ category not found'];
             }

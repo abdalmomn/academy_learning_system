@@ -11,7 +11,7 @@ class Faq extends Model
         'answer',
         'faq_category_id'
     ];
-    public function faq()
+    public function faq_category()
     {
         return $this->belongsTo(Faq_categories::class,'faq_category_id');
     }

@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\DTO\InterestDTO;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateCommentRequest extends FormRequest
+class StoreInterestRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +23,15 @@ class UpdateCommentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'comment' => 'required|string|max:500',
-            'video_id' => 'required|integer|exists:videos,id',
+            'category_id' => 'required|exists:categories,id',
+
         ];
+    }
+    public function toDTO()
+    {
+        return new InterestDTO(
+            user_id: auth()->id(),
+            category_id: $this->category_id,
+        );
     }
 }

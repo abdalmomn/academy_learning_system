@@ -14,8 +14,7 @@ class LeaderBoard extends Model
 
     public function leader()
     {
-        return $this->hasMany(User::class);
-    }
+        return $this->belongsTo(User::class, 'leader_id', 'id');    }
 
 //    public function course()
 //    {

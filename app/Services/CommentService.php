@@ -12,24 +12,30 @@ use Exception;
 
 class CommentService
 {
-    public function getAll()
+    public function getByVideo( $videoId)
     {
         try {
-            $comments = Comment::with(['user', 'video'])->latest()->paginate(10);
+            $comments = Comment::with(['user', 'video'])
+                ->where('video_id', $videoId)
+                ->latest()
+                ->paginate(10);
 
             if ($comments->isEmpty()) {
                 return [
                     'data' => null,
-                    'message' => 'No comments found'
+                    'message' => 'No comments found for this video'
                 ];
             }
 
             return [
                 'data' => $comments,
-                'message' => 'All comments'
+                'message' => 'Comments for video'
             ];
         } catch (Exception $e) {
-            Log::error('Fetching comments failed', ['error' => $e->getMessage()]);
+            Log::error('Fetching comments failed', [
+                'error' => $e->getMessage(),
+                'video_id' => $videoId
+            ]);
             return [
                 'data' => null,
                 'message' => 'Failed to fetch comments'
@@ -68,10 +74,10 @@ class CommentService
     public function create(CommentDTO $dto)
     {
         $user = Auth::user();
-        if (!$user || !in_array($user->role, ['woman', 'child'])) {
+        if (!$user ) {
             return [
                 'data' => null,
-                'message' => 'Unauthorized only teacher or supervisor can lock comments'
+                'message' => 'Unauthorized'
             ];
         }
         $video = Video::find($dto->video_id);
@@ -123,11 +129,24 @@ class CommentService
 
         DB::beginTransaction();
         try {
+            $video = Video::find($dto->video_id);
+            if (!$video) {
+                return [
+                    'data' => null,
+                    'message' => 'Video not found'
+                ];
+            }
             $comment = Comment::find($id);
             if (!$comment) {
                 return [
                     'data' => null,
                     'message' => 'Comment not found'
+                ];
+            }
+            if ($comment->video_id !== $dto->video_id) {
+                return [
+                    'data' => null,
+                    'message' => 'This comment does not belong to the selected video'
                 ];
             }
 
@@ -163,18 +182,20 @@ class CommentService
         }
     }
 
-    public function delete($id)
+    public function delete($id,  $video_id)
     {
+
         $user = Auth::user();
-        if (!$user || !in_array($user->role, ['admin', 'supervisor', 'admin'])) {
-            return [
-                'data' => null,
-                'message' => 'Unauthorized - only teacher, admin, or supervisor can delete comments'
-            ];
-        }
 
         DB::beginTransaction();
         try {
+            $video = Video::find($video_id);
+            if (!$video) {
+                return [
+                    'data' => null,
+                    'message' => 'Video not found'
+                ];
+            }
             $comment = Comment::find($id);
             if (!$comment) {
                 return [
@@ -182,7 +203,12 @@ class CommentService
                     'message' => 'Comment not found'
                 ];
             }
-
+            if (!$user || !$user->hasRole( ['admin', 'supervisor'])&& $user->id !== $comment->user_id) {
+                return [
+                    'data' => null,
+                    'message' => 'Unauthorized - only admin, supervisor, or comment owner can delete'
+                ];
+            }
             $comment->delete();
 
             DB::commit();
@@ -209,12 +235,13 @@ class CommentService
     {
         $user = Auth::user();
 
-        if (!$user || !in_array($user->role, ['teacher', 'supervisor'])) {
+        if (!$user||!$user->hasRole( ['teacher', 'supervisor'])) {
             return [
                 'data' => null,
-                'message' => 'Unauthorized  only teacher or supervisor can lock comments'
+                'message' => 'Unauthorized only teacher or supervisor can lock comments'
             ];
         }
+
 
         $video = Video::find($videoId);
         if (!$video) {
@@ -237,7 +264,7 @@ class CommentService
     {
         $user = Auth::user();
 
-        if (!$user || !in_array($user->role, ['teacher', 'supervisor'])) {
+        if (!$user ||!$user->hasRole( ['teacher', 'supervisor'])) {
             return [
                 'data' => null,
                 'message' => 'Unauthorized - only teacher or supervisor can unlock comments'

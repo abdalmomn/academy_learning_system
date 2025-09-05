@@ -169,7 +169,7 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPassword
 
     public function leader_board()
     {
-        return $this->belongsTo(LeaderBoard::class, 'leader_id');
+        return $this->hasMany(LeaderBoard::class, 'leader_id', 'id');
     }
     public function certificates()
     {

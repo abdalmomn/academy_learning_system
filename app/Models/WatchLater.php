@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class WatchLater extends Model
 {
+    protected $table = 'watch_later';
     protected $fillable = [
         'user_id',
         'video_id'

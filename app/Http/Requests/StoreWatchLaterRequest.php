@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\DTO\WatchLaterDTO;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateCommentRequest extends FormRequest
+class StoreWatchLaterRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +23,14 @@ class UpdateCommentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'comment' => 'required|string|max:500',
-            'video_id' => 'required|integer|exists:videos,id',
+            'video_id' => 'required|exists:videos,id',
         ];
+    }
+    public function toDTO()
+    {
+        return new WatchLaterDTO(
+            user_id: auth()->id(),
+            video_id: $this->video_id,
+        );
     }
 }

@@ -1,11 +1,14 @@
 <?php
 
+use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\BannedUserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\FaqCategoryController;
 use App\Http\Controllers\FaqController;
+use App\Http\Controllers\InterestController;
+use App\Http\Controllers\LeaderBoardController;
 use App\Http\Controllers\MakeSupervisorOrAdminAccountController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\PaymentController;
@@ -16,6 +19,7 @@ use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\TeacherRequestsController;
 use App\Http\Controllers\VerifyPinController;
 use App\Http\Controllers\VideoController;
+use App\Http\Controllers\WatchLaterController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -149,12 +153,13 @@ Route::post('/verify_pin_code',[VerifyPinController::class,'verify_pin_code'])->
 //    return $request->user();
 //})->middleware('auth:sanctum');
 Route::controller(CommentController::class)
-    ->middleware('auth:sanctum')->group(function(){
-        Route::get('GetAllComments'        ,   'index');
-        Route::get('GetCommetById/{id}'   ,    'show');
+    ->middleware('auth:sanctum')
+    ->group(function(){
+        Route::get('GetAllComments/{videoId}'        ,[CommentController::class,'index']);
+        Route::get('GetCommetById/{id}'   ,   [CommentController::class,'show']);
         Route::post('CreateComment'       ,   'store');
         Route::post('UpdateComment/{id}'  ,  'update');
-        Route::delete('DeleteComment/{id}', 'destroy');
+        Route::delete('DeleteComment/{videoid}/{id}', 'destroy');
         Route::post('videos/{id}/lock-comments',  'lockComments');
         Route::post('videos/{id}/unlock-comments', 'unlockComments');
     });
@@ -163,26 +168,54 @@ Route::controller(CommentController::class)
 
 Route::controller(FaqCategoryController::class)
     ->middleware('auth:sanctum')->group(function(){
-        Route::get('GetAll_faq-categories', 'index');
-        Route::get('GetOne_faq-categories/{id}', 'show');
+        Route::get('GetAll_faq-categories',[FaqCategoryController::class,'index']);
+        Route::get('GetOne_faq-categories/{id}', [FaqCategoryController::class,'show']);
         Route::post('Create_faq-categories',  'store'); // admin - supervisor
         Route::post('Update_faq-categories/{id}', 'update'); // admin - supervisor
         Route::delete('Delete_faq-categories/{id}','destroy'); // admin - supervisor
 
     });
 
+
 // FAQs
 
-Route::controller(FaqCategoryController::class)
+Route::controller(FaqController::class)
     ->middleware('auth:sanctum')->group(function(){
-        Route::get('/faqs', 'index');
-        Route::get('/faqs/{id}', 'show');
-        Route::post('/faqs',  'store'); // admin - supervisor
-        Route::post('/faqs/{id}', 'update'); // admin - supervisor
-        Route::delete('/faqs/{id}',  'destroy'); // admin - supervisor
+        Route::get('GetAll_faq', 'index');
+        Route::get('GetOne_faq/{id}', 'show');
+        Route::post('Create_faq',  'store'); // admin - supervisor
+        Route::post('Update_faq/{id}', 'update'); // admin - supervisor
+        Route::delete('Delete_faq/{id}',  'destroy'); // admin - supervisor
 
     });
 
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('watch-later', [WatchLaterController::class, 'index']);
+    Route::post('watch-later/toggle', [WatchLaterController::class, 'toggle']);
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('gettAll', [InterestController::class, 'index']);
+    Route::post('updateInterstes/{id}', [InterestController::class, 'update']);
+    Route::post('interests/toggle', [InterestController::class, 'toggle']);
+});
+
+Route::controller(LeaderBoardController::class)
+    ->middleware('auth:sanctum')->group(function(){
+        Route::get('GetAll_leaderboard',  'index');
+        Route::post('AddTo_leaderboard',  'store');
+        Route::delete('DeleteFrom_leaderboard/{id}', 'destroy');
+    });
+
+Route::controller(AchievementController::class)
+    ->middleware('auth:sanctum')->group(function() {
+        Route::get('GetAllAchiev/{userId}', [AchievementController::class, 'getByUser']);
+        Route::get('getAllMyachivement', [AchievementController::class, 'getAllMyachivement']);
+        Route::post('AddAchiev', [AchievementController::class, 'store']);
+        Route::post('UpdateAchiev/{id}', [AchievementController::class, 'update']);
+        Route::delete('DeleteAchiev/{id}', [AchievementController::class, 'destroy']);
+    });
 
     Route::get('/user', function (Request $request) {
             return $request->user();
