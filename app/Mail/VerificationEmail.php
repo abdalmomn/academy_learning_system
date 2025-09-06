@@ -24,11 +24,7 @@ class VerificationEmail extends Mailable
     public function __construct(User $user,$signedUrl)
     {
         $this->user = $user;
-        $this->signedUrl = URL::temporarySignedRoute(
-            'verification.verify',
-            now()->addMinutes(60),
-            ['id' => $user->id, 'hash' => sha1($user->email)]
-        );
+        $this->signedUrl = $signedUrl;
     }
 
     /**

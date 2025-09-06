@@ -40,7 +40,7 @@ class EmailVerificationService
 
         $user->markEmailAsVerified();
 
-
+        $message = 'Email verified successfully';
         if ($user->hasRole('child')){
             $code = generateTokenHelper::generate_code();
             PinCode::query()->create([
@@ -48,10 +48,11 @@ class EmailVerificationService
                'pin_code' => $code
             ]);
             Event::dispatch(new FamilyPinCode($user,$code));
+            $message = 'Email verified successfully, and pin code sent to your email, please check your email';
         }
         return [
             'status' => true,
-            'message' => 'Email verified successfully',
+            'message' => $message
         ];
     }
 }

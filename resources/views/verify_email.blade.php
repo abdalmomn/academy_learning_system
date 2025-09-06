@@ -38,7 +38,7 @@
     <div class="message {{ $status ? 'success' : 'error' }}">
         {{ $message }}
         <br>
-            <p>you can now return to use the application without any problem</p>
+            <p>return to the application</p>
     </div>
 </div>
 </body>

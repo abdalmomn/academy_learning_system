@@ -4,6 +4,7 @@ use App\Http\Middleware\CheckIfUserBanned;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Routing\Middleware\ValidateSignature;
 use Illuminate\Support\Facades\Schedule;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -16,7 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'isBanned' => CheckIfUserBanned::class,
+            'signed' => ValidateSignature::class,
         ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -35,7 +35,7 @@ class QuestionController extends Controller
             $data['data']->project_file = $validatedData['project_file'];
         }
 
-        return $this->Success($data['data'], $data['message']);
+        return $this->Success($data['data'], $data['message'], $data['code']);
     }
 
 

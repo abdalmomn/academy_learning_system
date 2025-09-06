@@ -3,6 +3,9 @@
 namespace App\Services;
 
 use App\DTO\PaymentDto;
+use App\Events\Notification\PaymentCompleted;
+use App\Events\Notification\PaymentFailed;
+use App\Events\UserRegistered;
 use App\Models\Category;
 use App\Models\Course;
 use App\Models\PromoCode;
@@ -11,6 +14,7 @@ use App\Models\User;
 use App\Models\Wallet;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use Stripe\Checkout\Session;
 use Stripe\Stripe;
@@ -40,11 +44,6 @@ class CheckoutService
             ->select('id','balance')
             ->first();
         unset($course['user_id']);unset($course['category_id']);
-        Log::info('checkout page fetched data successfully', [
-            'course' => $course,
-            'user' => $user,
-            'wallet' => $wallet
-        ]);
         if (!$user || !$course || !$wallet){
             Log::warning('checkout page missing data', [
                 'user' => $user,
@@ -76,12 +75,12 @@ class CheckoutService
             ];
         }
         $user = User::query()->where('id',$user_id)->first();
-        if ($user->email_verified_at == null){
-            return [
-                'data' => null,
-                'message' => 'verify your account first'
-            ];
-        }
+//        if ($user->email_verified_at == null){
+//            return [
+//                'data' => null,
+//                'message' => 'verify your account first'
+//            ];
+//        }
         if (!$user->hasRole(['child','woman'])){
             return [
                 'data' => null,
@@ -145,8 +144,7 @@ class CheckoutService
 
         if ($paymentDto->payment_method == 'points'){
             if ($total_price > $wallet->balance){
-                Transaction::query()
-                    ->create([
+                Transaction::query()->create([
                             'amount' => $total_price,
                             'description' => 'there is no enough wallet points to complete this transaction',
                             'status' => 'failed',
@@ -154,19 +152,31 @@ class CheckoutService
                             'transaction_method' => $paymentDto->payment_method,
                             'user_id' => $user_id,
                     ]);
+                event(new PaymentFailed($user,$course,$total_price,'points','لا يوجد رصيد كافي'));
+//                Event::dispatch(new PaymentFailed($user,$course,$total_price,'points','لا يوجد رصيد كافي'));
+
                 return [
                     'data' => null,
                     'message' => 'there is no enough points to complete this process'
                 ];
             }
+
+            if ($course->user()->where('course_id',$course->id)->exists()){
+                return [
+                    'data' => null,
+                    'message' => 'you have paid for this course already'
+                ];
+            }
+
             $wallet->balance -= $total_price;
             $wallet->save();
+            $wallet->refresh();
             if (!$course->user()->where('user_id', $user_id)->exists()) {
                 $course->user()->attach($user_id, [
                     'is_completed' => false,
                     'certificate_id' => null
                 ]);
-            };
+            }
             Transaction::query()
                 ->create([
                     'amount' => $total_price,
@@ -176,6 +186,8 @@ class CheckoutService
                     'transaction_method' => $paymentDto->payment_method,
                     'user_id' => $user_id,
                 ]);
+            event(new PaymentCompleted($user, $course, $total_price, 'points'));
+
             Log::info('payment success with points', [
                 'user_id' => $user_id,
                 'course_id' => $course->id]
@@ -188,6 +200,7 @@ class CheckoutService
 
 
         //stripe
+        $stripe_session = 0;
         if ($paymentDto->payment_method == 'stripe'){
             Stripe::setApiKey(env('STRIPE_SECRET'));
             $stripe_session = Session::create([
@@ -233,6 +246,7 @@ class CheckoutService
                 'certificate_id' => null
             ]);
         }
+
 
         Log::info('checkout success with stripe', [
             'user_id' => $user_id,
@@ -287,6 +301,9 @@ class CheckoutService
             'user_id' => $user_id,
         ]);
 
+        $user = auth()->user();
+        event(new PaymentCompleted($user, $course, $session->amount_total / 100, 'stripe'));
+
         return [
             'data' => null,
             'message' => 'processing payment successfully'
@@ -294,6 +311,8 @@ class CheckoutService
     }
     public function stripe_cancel(): array
     {
+        $user = auth()->user();
+        event(new PaymentFailed($user, null, 0, 'stripe', 'تم إلغاء عملية الدفع'));
         return [
           'data' => null,
           'message' => 'processing payment failure'

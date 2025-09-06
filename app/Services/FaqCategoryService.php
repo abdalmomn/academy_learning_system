@@ -29,7 +29,7 @@ class FaqCategoryService
     public function getById($id)
     {
         try {
-            $category = Faq_categories::with('faq')->find($id);
+            $category = Faq_categories::with('faqs')->find($id);
             return [
                 'data' => $category,
                 'message' => $category ? 'FAQ Category details' : 'FAQ Category not found'

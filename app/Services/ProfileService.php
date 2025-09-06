@@ -7,6 +7,7 @@ use App\Helper\profileHelper;
 use App\Models\AcademicCertificate;
 use App\Models\Achievement;
 use App\Models\BannedUser;
+use App\Models\Category;
 use App\Models\Comment;
 use App\Models\Course;
 use App\Models\ExamResult;
@@ -43,10 +44,15 @@ class ProfileService
                 ->where('id',Auth::id())
                 ->select('id','username', 'email', 'email_verified_at')
                 ->with('profile_details:first_name,last_name,date_of_birth,phone_number,profile_photo,user_id')
-                ->with('courses')
+                ->with('courses:id,course_name,description,poster,rating,price,status,is_paid,start_date,end_date,category_id')
                 ->with('ratings')
                 ->with('academic_certificates')
                 ->first();
+            //here
+            foreach ($profile->courses as $course){
+                $course['category_name'] = Category::query()->where('id',$course['category_id'])->pluck('category_name');
+                unset($course['category_id']);
+            }
             if(!$profile){
                 return [
                     'data' => null,
@@ -132,6 +138,10 @@ class ProfileService
                         'courses.start_date', 'courses.end_date', 'courses.user_id')
                         ->withCount('students');
                 }]);
+
+                foreach ($profile->courses as $course){
+                    unset($course['user_id']);
+                }
                 $totalStudents = $profile->courses->sum('students_count');
                 $profile['total_students'] = $totalStudents-1;
                 $profile['student_who_rates'] = $profile->ratings->count('id') ?? 0;

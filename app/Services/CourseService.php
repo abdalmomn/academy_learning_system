@@ -65,12 +65,11 @@ class CourseService
             $query = Course::where('status', 'published');
             $type = null;
             if ($user->hasRole('woman')){
-                $query->where('type', 'female');
                 $type = 'woman';
             }
             //courses for child
         elseif ($user->hasRole('child')) {
-            $query->where('type', 'children');
+//            $query->where('type', 'children');
             $type = 'child';
 
                  //courses for teacher and guest and supervisor
@@ -80,8 +79,12 @@ class CourseService
                 return ['data' => null, 'message' => 'You do not have access to view courses'];
             }
             $courses = Course::where('status', 'published')
-                ->select('id', 'course_name','description' , 'poster', 'price', 'rating','is_paid', 'status','user_id')
+                ->select('id', 'course_name','description' , 'poster', 'price', 'rating','is_paid', 'status','user_id','category_id')
+                ->with('category:id,category_name')
                 ->get();
+            foreach ($courses as $course){
+                unset($course->category['id']);
+            }
             foreach ($courses as $course){
                 $course['teacher_name'] = User::query()->select(['username as teacher_name'])->where('id', $course->user_id)->first();
                 unset($course['user_id']);
@@ -89,7 +92,7 @@ class CourseService
             if($courses->isempty()) {
                 return ['data' => null, 'message' => 'there is not Active courses '];
             }
-            $courses = $query->get();
+//            $courses = $query->get();
 
             if ($courses->isEmpty()) {
                 return ['data' => null, 'message' => "There are no active courses for $type"];
@@ -201,7 +204,7 @@ class CourseService
         if (!$user->hasRole('supervisor')){
             return [
                 'data' => null,
-                'message' => 'must be a teacher to update a course requirement'
+                'message' => 'must be a supervisor to get ended course'
             ];
         }
         try {
@@ -478,11 +481,11 @@ class CourseService
         }
         $query = Course::where('category_id', $categoryId)->where('status', 'published');
 
-        if ($user->hasRole('woman')) {
-            $query->where('type', 'female');
-        } elseif ($user->hasRole('child')) {
-            $query->where('type', 'children');
-        }
+//        if ($user->hasRole('woman')) {
+//            $query->where('type', 'female');
+//        } elseif ($user->hasRole('child')) {
+//            $query->where('type', 'children');
+//        }
         $courses = $query->get();
         if ($courses->isEmpty()) {
             return ['data' => null, 'message' => 'There are not active courses for this category'];

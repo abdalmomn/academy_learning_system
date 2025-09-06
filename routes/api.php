@@ -11,15 +11,16 @@ use App\Http\Controllers\InterestController;
 use App\Http\Controllers\LeaderBoardController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExamController;
+use App\Http\Controllers\FcmTokenController;
 use App\Http\Controllers\MakeSupervisorOrAdminAccountController;
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OptionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PromoCodeController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\ResetPasswordController;
-use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\TeacherRequestsController;
 use App\Http\Controllers\VerifyPinController;
 use App\Http\Controllers\VideoController;
@@ -77,7 +78,7 @@ Route::controller(ProfileController::class)
    Route::get('/my_profile' , 'show_my_profile_details');
    Route::get('/profile/{user_id}' , 'show_user_profile_details');
    Route::post('/profile/edit' , 'edit_profile');
-   Route::post('/profile/delete' , 'delete_account');
+   Route::delete('/profile/delete' , 'delete_account');
    Route::get('/username' , 'username');
 });
 
@@ -98,6 +99,7 @@ Route::controller(CourseController::class)
     Route::post('approve-course/{course_id}',  'approve_course');
     //filter for category
     Route::get('/categories/{category-id}/courses',  'getCoursesByCategory');
+        Route::get('getAllActivecourses',  'index');
 
     Route::get('get_all_courses',  'all_courses');
     Route::post('attendance_register',  'attendance_register');
@@ -105,7 +107,6 @@ Route::controller(CourseController::class)
 Route::controller(CourseController::class)
     ->group(function () {
         Route::get('getCourseDetails/{id}',  'show');
-        Route::get('getAllActivecourses',  'index');
     });
 
 
@@ -151,10 +152,8 @@ Route::controller(PaymentController::class)
 
 Route::post('/verify_pin_code',[VerifyPinController::class,'verify_pin_code'])->middleware('auth:sanctum');
 
-//
-//Route::get('/user', function (Request $request) {
-//    return $request->user();
-//})->middleware('auth:sanctum');
+
+
 Route::controller(CommentController::class)
     ->middleware('auth:sanctum')
     ->group(function(){
@@ -189,7 +188,8 @@ Route::controller(FaqController::class)
         Route::post('Create_faq',  'store'); // admin - supervisor
         Route::post('Update_faq/{id}', 'update'); // admin - supervisor
         Route::delete('Delete_faq/{id}',  'destroy'); // admin - supervisor
-
+//        Route::get('/faqs', 'index');
+//        Route::get('/faqs/{id}', 'show');
     });
 
 
@@ -263,3 +263,11 @@ Route::controller(DashboardController::class)
         Route::get('show_all_supervisors' , 'show_all_supervisors');
     });
 
+
+//    Route::post('/fcm/token', [FcmTokenController::class, 'store']);
+//    Route::get('/notifications', [NotificationController::class, 'index']);
+//    Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead']);
+Route::middleware('auth:sanctum')->group(function () {
+Route::post('update-device-token', [FcmTokenController::class, 'updateDeviceToken']);
+Route::post('send-fcm-notification', [FcmTokenController::class, 'sendFcmNotification']);
+});

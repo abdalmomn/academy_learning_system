@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Events\Notification\PaymentCompleted;
+use App\Events\Notification\PaymentFailed;
+use App\Listeners\Notification\HandlePaymentNotification;
 use App\Listeners\SendPinCodeEmail;
 use App\Listeners\SendResetCodeEmail;
 use App\Listeners\SendVerificationEmail;
@@ -22,6 +25,15 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
+
+    protected $listen = [
+        PaymentCompleted::class => [
+            HandlePaymentNotification::class,
+        ],
+        PaymentFailed::class => [
+            HandlePaymentNotification::class,
+        ],
+    ];
     public function boot(): void
     {
         // Implicitly grant "Super Admin" role all permissions
@@ -33,5 +45,6 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(SendVerificationEmail::class);
         Event::listen(SendResetCodeEmail::class);
         Event::listen(SendPinCodeEmail::class);
+
     }
 }

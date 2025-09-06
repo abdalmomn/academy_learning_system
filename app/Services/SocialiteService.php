@@ -6,6 +6,7 @@ use App\DTO\SocialiteDto;
 use App\Helper\RolesAndPermissionsHelper;
 use App\Models\ProfileDetail;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -42,6 +43,7 @@ class SocialiteService
                 $user->update([
                     'social_id' => $dto->social_id,
                     'social_type' => $dto->social_type,
+                    'email_verified_at' => Carbon::now(),
                 ]);
                 if (!$user->hasRole($userType)) {
                     $user->assignRole($userType);

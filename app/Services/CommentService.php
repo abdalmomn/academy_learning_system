@@ -74,10 +74,10 @@ class CommentService
     public function create(CommentDTO $dto)
     {
         $user = Auth::user();
-        if (!$user ) {
+        if (!$user->hasRole(['woman', 'child'])) {
             return [
                 'data' => null,
-                'message' => 'Unauthorized'
+                'message' => 'only students can comment'
             ];
         }
         $video = Video::find($dto->video_id);

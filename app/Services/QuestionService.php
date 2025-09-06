@@ -18,27 +18,31 @@ class QuestionService
             if (!$user->hasRole('teacher')) {
                 return [
                     'data' => null,
-                    'message' => 'must be teacher to create questions'
+                    'message' => 'must be teacher to create questions',
+                    'code' => 401
                 ];
             }
+
             $exam = Exam::find($request['exam_id']);
             if (!$exam) {
                 return [
                     'data' => null,
-                    'message' => 'exam not found'
+                    'message' => 'exam not found',
+                    'code' => 404
                 ];
             }
+
             if ($exam->exam_mode !== $request['question_type']) {
                 return [
                     'data' => null,
-                    'message' => "Question type must match the exam mode ({$exam->exam_mode})"
+                    'message' => "Question type must match the exam mode ({$exam->exam_mode})",
+                    'code' => 400
                 ];
             }
+
             $question = Question::query()->create($request);
 
-
             if ($question->question_type === 'project' && $file) {
-
                 ProjectSubmission::create([
                     'file_path'     => $request['project_file'],
                     'user_id'       => $user->id,
@@ -56,17 +60,20 @@ class QuestionService
 
             return [
                 'data' => $question,
-                'message' => 'question created successfully'
+                'message' => 'question created successfully',
+                'code' => 200
             ];
 
         } catch (\Exception $e) {
             Log::warning($e->getMessage());
             return [
                 'data' => null,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'code' => 500
             ];
         }
     }
+
 
 
     public function update_question($question_dto, $question_id): array
