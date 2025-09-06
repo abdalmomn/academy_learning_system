@@ -20,7 +20,10 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PromoCodeController;
 use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ResetPasswordController;
+use App\Http\Controllers\SocialiteController;
+use App\Http\Controllers\StrikeController;
 use App\Http\Controllers\TeacherRequestsController;
 use App\Http\Controllers\VerifyPinController;
 use App\Http\Controllers\VideoController;
@@ -262,6 +265,14 @@ Route::controller(DashboardController::class)
         Route::get('show_all_students' , 'show_all_students');
         Route::get('show_all_supervisors' , 'show_all_supervisors');
     });
+Route::middleware('auth:sanctum')->get('/my-strike', [StrikeController::class, 'show']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/courses/{course_id}/Addrate', [RatingController::class, 'rateCourse']);
+    Route::get('/courses/{course_id}/ratings', [RatingController::class, 'getCourseRatings']);
+
+    Route::post('/teachers/{teacher_id}/Addrate', [RatingController::class, 'rateTeacher']);
+    Route::get('/teachers/{teacher_id}/ratings', [RatingController::class, 'getTeacherRatings']);
+});
 
 
 //    Route::post('/fcm/token', [FcmTokenController::class, 'store']);

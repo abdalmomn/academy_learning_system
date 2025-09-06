@@ -9,11 +9,13 @@ use App\Models\McqAnswer;
 use App\Models\McqOption;
     use App\Models\ProjectSubmission;
     use App\Models\Question;
-use App\Models\User;
+    use App\Models\Strike;
+    use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+    use Illuminate\Support\Facades\DB;
+    use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ExamService
@@ -281,6 +283,7 @@ class ExamService
         $already_answered = McqAnswer::where('user_id', $user_id)
             ->where('question_id', $question_id)
             ->exists();
+
         if ($already_answered) {
             return [
                 'data' => null,
@@ -355,7 +358,19 @@ class ExamService
             ->count();
 
         $percentage = round(($correctAnswers / $totalQuestions) * 100, 2);
-
+        $strike =Strike::updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'date' => now()->toDateString()
+            ],
+            [
+                'streak' => DB::raw('streak + 1'),
+                'attended' => true
+            ]
+        );
+//            $strike->streak += 1;
+        $strike->attended =true ;
+        $strike->save();
         if ($percentage >= 50) {
 //            $certificate = $this->generateCertificate($user, $course);
 
@@ -441,7 +456,6 @@ class ExamService
             $question_id = $request['question_id'];
             $user_id = Auth::id();
 
-            // تحقق إذا الطالب رفع ملف مسبقاً لنفس السؤال
             $existing = ProjectSubmission::where('question_id', $question_id)
                 ->where('user_id', $user_id)
                 ->first();
@@ -454,6 +468,19 @@ class ExamService
             }
             $request['user_id'] = $user_id;
             $submission = ProjectSubmission::query()->create($request);
+            $strike =Strike::updateOrCreate(
+                [
+                    'user_id' => $user_id,
+                    'date' => now()->toDateString()
+                ],
+                [
+                    'streak' => DB::raw('streak + 1'),
+                    'attended' => true
+                ]
+            );
+            $strike->streak += 1;
+            $strike->attended =true ;
+            $strike->save();
             unset($submission['created_at']);unset($submission['updated_at']);
             return [
                 'data' => $submission,
@@ -467,8 +494,10 @@ class ExamService
 
             return [
                 'data' => null,
-                'message' => 'Failed to submit the project'
+                'message' => $e->getMessage()
+//                'message' => 'Failed to submit the project'
             ];
         }
     }
+
 }

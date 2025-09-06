@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->date('date');
-            $table->integer('watch_time')->default(0);
+            $table->time('watch_time')->nullable();
             $table->boolean('attended')->default(false);
             $table->integer('streak')->default(0);
             $table->timestamps();

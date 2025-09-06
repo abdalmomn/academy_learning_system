@@ -9,6 +9,7 @@ use App\Helper\RolesAndPermissionsHelper;
 use App\Models\AcademicCertificate;
 use App\Models\BannedUser;
 use App\Models\ProfileDetail;
+use App\Models\Strike;
 use App\Models\User;
 use App\Models\Wallet;
 use Exception;
@@ -40,6 +41,10 @@ class AuthenticationService
         ProfileDetail::query()->create(['user_id' => $user->id]);
         Wallet::query()->create(['user_id' => $user->id]);
 
+            Strike::create([
+                'user_id' => $user->id,
+                'date' => now()->toDateString(),
+            ]);
             $certificates = [];
             if ($signUpDto->user_type === 'teacher' && !empty($signUpDto->file_path)) {
                 foreach ($signUpDto->file_path as $path) {

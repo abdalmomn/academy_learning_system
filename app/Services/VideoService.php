@@ -5,8 +5,10 @@ namespace App\Services;
 use App\DTO\VideoDto;
 use App\Helper\videoHelper;
 use App\Models\Course;
+use App\Models\Strike;
 use App\Models\UserAttendance;
 use App\Models\Video;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use FFMpeg\FFMpeg;
@@ -219,6 +221,13 @@ class VideoService
     public function show_video($video_id):array
     {
         try {
+            $user = auth()->user();
+            if (!$user) {
+                return [
+                    'data' => null,
+                    'message' => 'You must be logged in to access this video.'
+                ];
+            }
             $video = Video::query()
                 ->select('id', 'title', 'description', 'url' , 'duration', 'poster')
                 ->find($video_id);
@@ -228,7 +237,25 @@ class VideoService
                     'message' => 'video not found.',
                 ];
             }
-
+            $strike =Strike::firstOrNew(
+                [
+                    'user_id' => $user->id,
+                    'date' => now()->toDateString()
+                ],
+                [
+                    'watch_time' => "00:00:00",
+                    'attended' => false,
+                    'streak' => 0,
+                ]
+            );
+            if ($strike->wasRecentlyCreated) {
+                $strike->watch_time = $video->duration ?: "00:00:00";
+            } else {
+                $strike->watch_time = $this->addTime($strike->watch_time, $video->duration);
+            }
+            $strike->streak += 1;
+            $strike->attended =true ;
+            $strike->save();
             return [
                 'data' => $video,
                 'message' => 'video retrieved successfully',
@@ -238,8 +265,33 @@ class VideoService
 
             return [
                 'data' => null,
-                'message' => 'fail to retrieve video.',
+                'message' => $e->getMessage()
+//                'message' => 'fail to retrieve video.',
             ];
+        }
+    }
+
+    private function addTime($time1, $time2)
+    {
+        try {
+            $time1 = $time1 ?: '00:00:00';
+            $time2 = $time2 ?: '00:00:00';
+
+            list($h1, $m1, $s1) = array_pad(explode(':', $time1), 3, 0);
+            list($h2, $m2, $s2) = array_pad(explode(':', $time2), 3, 0);
+
+            $totalSeconds = ((int)$h1 + (int)$h2) * 3600 +
+                ((int)$m1 + (int)$m2) * 60 +
+                ((int)$s1 + (int)$s2);
+
+            $hours = floor($totalSeconds / 3600);
+            $minutes = floor(($totalSeconds % 3600) / 60);
+            $seconds = $totalSeconds % 60;
+
+            return sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+
+        } catch (\Exception $e) {
+            return '00:00:00';
         }
     }
 }
