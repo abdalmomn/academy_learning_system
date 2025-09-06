@@ -22,6 +22,11 @@ class InterestController extends Controller
         return $this->Success($data['data'], $data['message']);
     }
 
+    public function show_courses_from_interests()
+    {
+        $data = $this->interestService->show_courses_as_interests();
+        return $this->Success($data['data'],$data['message']);
+    }
 
 
     public function update($id, StoreInterestRequest $request)

@@ -40,7 +40,8 @@ class RolesAndPermissionsHelper
 
         // Assign permissions associated with the client role
         $permissions = $user->getRoleNames()->map(function($roleName) {
-            return \Spatie\Permission\Models\Role::findByName($roleName)->permissions->pluck('name')->toArray();
+            return \Spatie\Permission\Models\Role::findByName($roleName, 'web')
+                ->permissions->pluck('name')->toArray();
         })->flatten()->unique();
         $user->givePermissionTo($permissions);
 

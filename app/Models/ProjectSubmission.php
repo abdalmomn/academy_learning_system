@@ -7,10 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class ProjectSubmission extends Model
 {
     protected $fillable = [
-        'question_id',
-        'user_id',
         'file_path',
-        'submission_type',
+        'user_id',
+        'question_id',
         'grade',
         'feedback'
     ];

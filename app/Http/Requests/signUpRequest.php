@@ -29,7 +29,7 @@ class signUpRequest extends FormRequest
             'social_id'    => 'nullable|string|max:255',
             'social_type'  => 'nullable|string|in:google,facebook,apple',
             'file_path' => 'required_if:user_type,teacher|array',
-            'file_path.*' => 'file|mimes:pdf,jpg,png|max:2048',
+            'file_path.*' => 'file|mimes:pdf,jpg,png',
             'description'  => 'nullable|string',
             ];
     }

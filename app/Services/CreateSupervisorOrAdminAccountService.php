@@ -36,10 +36,8 @@ class CreateSupervisorOrAdminAccountService
             $userData['is_approved'] = true;
 
             $user = User::query()->create($userData);
-
             $user->assignRole(Role::findByName($signUpDto->user_type, 'web'));
             $user = $this->helper->give_and_load_permissions_and_roles($signUpDto->user_type, $user);
-
             //Event::dispatch(new UserRegistered($user));
 
             DB::commit();
@@ -58,14 +56,14 @@ class CreateSupervisorOrAdminAccountService
         } catch (Exception $e) {
             DB::rollBack();
 
-            Log::error('Failed to create an account', [
+            Log::error('failed to create an account', [
                 'admin_id' => Auth::id(),
                 'error' => $e->getMessage(),
             ]);
 
             return [
                 'data' => null,
-                'message' => 'Error creating supervisor account.'
+                'message' => 'error in creating supervisor account.'
             ];
         }
     }

@@ -14,7 +14,6 @@ use App\Http\Controllers\ExamController;
 use App\Http\Controllers\FcmTokenController;
 use App\Http\Controllers\MakeSupervisorOrAdminAccountController;
 use App\Http\Controllers\AuthenticationController;
-use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OptionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
@@ -27,8 +26,8 @@ use App\Http\Controllers\StrikeController;
 use App\Http\Controllers\TeacherRequestsController;
 use App\Http\Controllers\VerifyPinController;
 use App\Http\Controllers\VideoController;
+use App\Http\Controllers\WalletController;
 use App\Http\Controllers\WatchLaterController;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 Route::middleware('isBanned')->group(function () {
@@ -114,7 +113,8 @@ Route::controller(CourseController::class)
 
 
 
-Route::controller(CategoryController::class)->group(function () {
+Route::controller(CategoryController::class)
+    ->middleware('auth:sanctum')->group(function () {
     Route::get('getAllCategory', 'index');
     Route::post('CreateCategory', 'store');
     Route::post('UpdateCategory/{category}', 'update');
@@ -148,9 +148,9 @@ Route::controller(PaymentController::class)
     ->middleware('auth:sanctum')->group(function (){
    Route::get('checkout', 'checkout_page');
    Route::post('payment', 'checkout');
-   Route::get('payment/success', 'stripe_success')->name('payment.success');
-   Route::get('payment/cancel', 'stripe_cancel')->name('payment.cancel');
-});
+    });
+Route::get('payment/success', [PaymentController::class,'stripe_success'])->name('payment.success');
+Route::get('payment/cancel', [PaymentController::class,'stripe_cancel'])->name('payment.cancel');
 
 
 Route::post('/verify_pin_code',[VerifyPinController::class,'verify_pin_code'])->middleware('auth:sanctum');
@@ -186,13 +186,14 @@ Route::controller(FaqCategoryController::class)
 
 Route::controller(FaqController::class)
     ->middleware('auth:sanctum')->group(function(){
-        Route::get('GetAll_faq', 'index');
-        Route::get('GetOne_faq/{id}', 'show');
+//        Route::get('GetAll_faq', 'index');
+//        Route::get('GetOne_faq/{id}', 'show');
         Route::post('Create_faq',  'store'); // admin - supervisor
         Route::post('Update_faq/{id}', 'update'); // admin - supervisor
         Route::delete('Delete_faq/{id}',  'destroy'); // admin - supervisor
-//        Route::get('/faqs', 'index');
-//        Route::get('/faqs/{id}', 'show');
+        Route::get('/faqs', 'index');
+        Route::get('/faqs/{id}', 'show');
+        Route::get('/faqs/category/{categoryId}', 'getByCategory');
     });
 
 
@@ -205,6 +206,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('gettAll', [InterestController::class, 'index']);
     Route::post('updateInterstes/{id}', [InterestController::class, 'update']);
     Route::post('interests/toggle', [InterestController::class, 'toggle']);
+    Route::get('show_interested_courses', [InterestController::class, 'show_courses_from_interests']);
 });
 
 Route::controller(LeaderBoardController::class)
@@ -239,8 +241,10 @@ Route::controller(ExamController::class)
         Route::delete('delete_exam/{exam_id}' , 'delete_exam');
         Route::post('store_exam_answer' , 'store_exam_answer');
         Route::get('get_exam_result/{exam_id}' , 'get_exam_result');
-        Route::get('certificate' , 'certificate');
         Route::post('submit_project_answer' , 'submit_project_by_students');
+        Route::get('show_projects_by_teacher/{exam_id}' , 'show_project_result');
+        Route::get('my_project_result/{project_id}' , 'show_my_project_result');
+        Route::post('correct_project/{project_id}' , 'correct_project');
     });
 
 Route::controller(QuestionController::class)
@@ -275,10 +279,8 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
-//    Route::post('/fcm/token', [FcmTokenController::class, 'store']);
-//    Route::get('/notifications', [NotificationController::class, 'index']);
-//    Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead']);
-Route::middleware('auth:sanctum')->group(function () {
-Route::post('update-device-token', [FcmTokenController::class, 'updateDeviceToken']);
-Route::post('send-fcm-notification', [FcmTokenController::class, 'sendFcmNotification']);
+Route::controller(WalletController::class)
+    ->middleware('auth:sanctum')
+    ->group(function(){
+   Route::get('my_wallet', 'show_my_wallet');
 });

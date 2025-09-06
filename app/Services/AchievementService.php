@@ -3,43 +3,55 @@
 namespace App\Services;
 use App\Models\Achievement;
 use App\DTO\AchievementDTO;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 class AchievementService
 {
-    public function getByUser( $userId)
+
+
+    public function getByUser($userId)
     {
         try {
-            $achievements = Achievement::with('user')
-                ->where('user_id', $userId)
-                ->get();
+            $user = User::with(['achievements' => function ($query) {
+                $query->withPivot('is_done', 'progress_percentage');
+            }])->find($userId);
 
-            if ($achievements->isEmpty()) {
+            if (!$user || $user->achievements->isEmpty()) {
                 return [
                     'data' => null,
                     'message' => 'No achievements found for this user'
                 ];
             }
-
+            foreach ($user->achievements as $achievement){
+                $users = User::query()->where('id',$userId)->first();
+                unset($achievement['created_at']);unset($achievement['updated_at']);unset($achievement->pivot['user_id']);unset($achievement->pivot['created_at']);unset($achievement->pivot['updated_at']);unset($achievement->pivot['achievement_id']);
+                $achievement->pivot['user_name'] = $users->username;
+            }
             return [
-                'data' => $achievements,
+                'data' => $user->achievements,
                 'message' => 'Achievements for user id ' . $userId
             ];
         } catch (\Exception $e) {
-            Log::error('Fetching achievements failed', ['error' => $e->getMessage(), 'user_id' => $userId]);
+            Log::error('Fetching achievements failed', [
+                'error' => $e->getMessage(),
+                'user_id' => $userId
+            ]);
             return [
                 'data' => null,
-                'message' => $e->getMessage()
-//                'message' => 'Failed to fetch achievements'
+                'message' => 'Failed to fetch achievements'
             ];
         }
     }
+
     public function getAllMyachivement()
     {
-        $user = auth()->user(); // المستخدم الحالي
         try {
-            $achievements = Achievement::with('user')
-                ->where('user_id', $user->id)
+            $user = Auth::user();
+
+            $achievements = $user->achievements()
+                ->withPivot('is_done', 'progress_percentage')
                 ->get();
 
             if ($achievements->isEmpty()) {
@@ -48,13 +60,21 @@ class AchievementService
                     'message' => 'No achievements found for this user'
                 ];
             }
+            foreach ($achievements as $achievement){
+                $user_name = User::query()->where('id',Auth::id())->pluck('username');
+                unset($achievement['created_at']);unset($achievement['updated_at']);unset($achievement->pivot['user_id']);unset($achievement->pivot['created_at']);unset($achievement->pivot['updated_at']);unset($achievement->pivot['achievement_id']);
+                $achievement->pivot['user_name'] = $user_name;
+            }
 
             return [
                 'data' => $achievements,
-                'message' => 'Achievements for current user'
+                'message' => 'Achievements retrieved successfully'
             ];
         } catch (\Exception $e) {
-            Log::error('Fetching achievements failed', ['error' => $e->getMessage(), 'user_id' => $user->id]);
+            Log::error('Fetching my achievements failed', [
+                'error' => $e->getMessage(),
+                'user_id' => Auth::id()
+            ]);
             return [
                 'data' => null,
                 'message' => 'Failed to fetch achievements'

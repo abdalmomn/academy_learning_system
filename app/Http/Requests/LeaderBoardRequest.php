@@ -23,7 +23,7 @@ class LeaderBoardRequest extends FormRequest
     {
         return [
             'leader_id'   => 'required|exists:users,id',
-            'leader_type' => 'required|string',
+            'leader_type' => 'required|string|in:teacher,student',
             'points'      => 'nullable|integer|min:0'
         ];
     }

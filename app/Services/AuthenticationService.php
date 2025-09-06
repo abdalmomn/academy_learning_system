@@ -8,6 +8,7 @@ use App\Events\UserRegistered;
 use App\Helper\RolesAndPermissionsHelper;
 use App\Models\AcademicCertificate;
 use App\Models\BannedUser;
+use App\Models\LeaderBoard;
 use App\Models\ProfileDetail;
 use App\Models\Strike;
 use App\Models\User;
@@ -40,15 +41,15 @@ class AuthenticationService
         $user = User::query()->create($userData);
         ProfileDetail::query()->create(['user_id' => $user->id]);
         Wallet::query()->create(['user_id' => $user->id]);
-
             Strike::create([
                 'user_id' => $user->id,
                 'date' => now()->toDateString(),
             ]);
-            $certificates = [];
+        $leader_type = $signUpDto->user_type == 'teacher'? 'teacher' :  'student';
+        LeaderBoard::query()->create(['leader_id' => $user->id, 'leader_type' => $leader_type]);
             if ($signUpDto->user_type === 'teacher' && !empty($signUpDto->file_path)) {
                 foreach ($signUpDto->file_path as $path) {
-                    $certificates[] = AcademicCertificate::query()->create([
+                    AcademicCertificate::query()->create([
                         'file_path' => $path,
                         'description' => $signUpDto->description ?? null,
                         'teacher_id' => $user->id

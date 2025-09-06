@@ -60,8 +60,11 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPassword
     }
     public function achievements()
     {
-        return $this->belongsToMany(Achievement::class)->withTimestamps()->withPivot('is_done', 'progress_percentage');
+        return $this->belongsToMany(Achievement::class)
+            ->withTimestamps()
+            ->withPivot('is_done', 'progress_percentage');
     }
+
 //    public function academic_certificates()
 //    {
 //        return $this->hasMany(AcademicCertificate::class);

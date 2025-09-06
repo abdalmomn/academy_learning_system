@@ -13,9 +13,11 @@ class Achievement extends Model
         'user_id'
     ];
 
-    public function user()
+    public function users()
     {
-//        return $this->belongsToMany(User::class,'user_id')->withTimestamps()->withPivot('is_done','progress_percentage');
-        return $this->belongsTo(User::class,'user_id');
+        return $this->belongsToMany(User::class)
+            ->withTimestamps()
+            ->withPivot('is_done', 'progress_percentage');
     }
+
 }

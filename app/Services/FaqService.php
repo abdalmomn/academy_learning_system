@@ -22,6 +22,24 @@ class FaqService
             return ['data' => null, 'message' => 'Failed to fetch FAQs'];
         }
     }
+    public function getByCategoryId($categoryId)
+    {
+        try {
+            $faqs = Faq::where('faq_category_id', $categoryId)
+                ->latest()
+                ->get();
+
+            return [
+                'data' => $faqs,
+                'message' => $faqs->isEmpty()
+                    ? 'No FAQs found for this category'
+                    : 'FAQs for category ' . $categoryId
+            ];
+        } catch (Exception $e) {
+            Log::error('Fetching FAQs by category failed', ['error' => $e->getMessage()]);
+            return ['data' => null, 'message' => 'Failed to fetch FAQs by category'];
+        }
+    }
 
     public function getById($id)
     {

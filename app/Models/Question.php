@@ -16,7 +16,7 @@ class Question extends Model
     {
         return $this->hasMany(McqOption::class);
     }
-    public function projects()
+    public function projectSubmissions()
     {
         return $this->hasMany(ProjectSubmission::class);
     }

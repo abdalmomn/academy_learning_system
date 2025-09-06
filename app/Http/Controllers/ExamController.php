@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\DTO\ExamDto;
 use App\Http\Requests\AnswersRequest;
+use App\Http\Requests\CorrectProjectRequest;
 use App\Http\Requests\CreateExamRequest;
+use App\Http\Requests\ShowProjectResultRequest;
 use App\Http\Requests\SubmitProjectRequest;
 use App\Http\Requests\UpdateExamRequest;
 use App\ResponseTrait;
@@ -70,11 +72,6 @@ class ExamController extends Controller
         $data = $this->examService->get_exam_result($exam_id);
         return $this->Success($data['data'],$data['message']);
     }
-    public function certificate()
-    {
-        $data = $this->examService->certificate();
-        return $this->Success($data['data'],$data['message']);
-    }
     public function submit_project_by_students(SubmitProjectRequest $request)
     {
         $validated_data = $request->validated();
@@ -84,6 +81,24 @@ class ExamController extends Controller
         }
         $data = $this->examService->submit_project_by_students($validated_data);
         return $this->Success($data['data'],$data['message']);
+    }
+    public function show_project_result($exam_id)
+    {
+        $data = $this->examService->show_project_result($exam_id);
+        return $this->Success($data['data'], $data['message']);
+    }
+    public function show_my_project_result($project_id)
+    {
+        $data = $this->examService->show_my_project_result($project_id);
+        return $this->Success($data['data'], $data['message']);
+    }
+
+    public function correct_project(CorrectProjectRequest $request, $id)
+    {
+        $validated = $request->validated();
+
+        $data = $this->examService->correct_project($id, $validated);
+        return $this->Success($data['data'], $data['message']);
     }
 
 }

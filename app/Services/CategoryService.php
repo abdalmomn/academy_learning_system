@@ -3,6 +3,7 @@
         namespace App\Services;
         use App\Models\Category;
         use App\DTO\CategoryDto;
+        use Illuminate\Support\Facades\Auth;
         use Illuminate\Support\Facades\DB;
         use Illuminate\Support\Facades\Log;
         use Exception;
@@ -39,8 +40,8 @@
             {
                 //check for permission role
                 // check foe the user must be found and must be admin
-                $user = auth()->user();
-                if (!$user || auth()->user()->role !== 'admin') {
+                $user = Auth::user();
+                if (!$user->hasRole('admin')) {
                     return [
                         'data' => null,
                         'message' => 'Unauthorized - admin only'
@@ -77,8 +78,8 @@
             {
                 //check for permission role
                 // check foe the user must be found and must be admin
-                $user = auth()->user();
-                if (!$user || auth()->user()->role !== 'admin') {
+                $user = Auth::user();
+                if (!$user->hasRole('admin')) {
                     return [
                         'data' => null,
                         'message' => 'Unauthorized - admin only'
@@ -123,8 +124,8 @@
             {
                 //check for permission role
                 // check foe the user must be found and must be admin
-                $user = auth()->user();
-                if (!$user || auth()->user()->role !== 'admin') {
+                $user = Auth::user();
+                if (!$user->hasRole('admin')) {
                     return [
                         'data' => null,
                         'message' => 'Unauthorized - admin only'

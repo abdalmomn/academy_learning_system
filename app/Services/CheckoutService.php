@@ -152,8 +152,6 @@ class CheckoutService
                             'transaction_method' => $paymentDto->payment_method,
                             'user_id' => $user_id,
                     ]);
-                event(new PaymentFailed($user,$course,$total_price,'points','لا يوجد رصيد كافي'));
-//                Event::dispatch(new PaymentFailed($user,$course,$total_price,'points','لا يوجد رصيد كافي'));
 
                 return [
                     'data' => null,
@@ -186,7 +184,6 @@ class CheckoutService
                     'transaction_method' => $paymentDto->payment_method,
                     'user_id' => $user_id,
                 ]);
-            event(new PaymentCompleted($user, $course, $total_price, 'points'));
 
             Log::info('payment success with points', [
                 'user_id' => $user_id,
@@ -301,8 +298,6 @@ class CheckoutService
             'user_id' => $user_id,
         ]);
 
-        $user = auth()->user();
-        event(new PaymentCompleted($user, $course, $session->amount_total / 100, 'stripe'));
 
         return [
             'data' => null,
@@ -311,8 +306,6 @@ class CheckoutService
     }
     public function stripe_cancel(): array
     {
-        $user = auth()->user();
-        event(new PaymentFailed($user, null, 0, 'stripe', 'تم إلغاء عملية الدفع'));
         return [
           'data' => null,
           'message' => 'processing payment failure'

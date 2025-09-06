@@ -2,20 +2,22 @@
 
 namespace App\Services;
 
-    use App\Models\Certificate;
+use App\Models\Certificate;
 use App\Models\Course;
 use App\Models\Exam;
+use App\Models\LeaderBoard;
 use App\Models\McqAnswer;
 use App\Models\McqOption;
-    use App\Models\ProjectSubmission;
-    use App\Models\Question;
-    use App\Models\Strike;
-    use App\Models\User;
+use App\Models\ProjectSubmission;
+use App\Models\Question;
+use App\Models\Strike;
+use App\Models\User;
+use App\Models\Wallet;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Support\Facades\Auth;
-    use Illuminate\Support\Facades\DB;
-    use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ExamService
@@ -371,6 +373,16 @@ class ExamService
 //            $strike->streak += 1;
         $strike->attended =true ;
         $strike->save();
+        $leader = LeaderBoard::query()
+            ->where('leader_id' , Auth::id())
+            ->first();
+        $leader->points += $percentage/10;
+        $leader->update(['points' => $leader->points]);
+        $wallet = Wallet::query()
+            ->where('user_id',Auth::id())
+            ->first();
+        $wallet->balance += $percentage/10;
+        $wallet->update(['balance' , $wallet->balance]);
         if ($percentage >= 50) {
 //            $certificate = $this->generateCertificate($user, $course);
 
@@ -381,7 +393,7 @@ class ExamService
                     'percentage' => $percentage,
 //                    'certificate_url' => Storage::url($certificate->certificate_url),
                 ],
-                'message' => 'Congratulations! You passed the exam and earned a certificate.'
+                'message' => 'Congratulations! You passed the exam and earned a ' . ($percentage / 10) . ' points',
             ];
         }
 
@@ -395,52 +407,6 @@ class ExamService
         ];
     }
 
-
-//    public function generateCertificate($user, $course)
-//    {
-//        $data = [
-//            'username' => $user->username,
-//            'course_name' => $course->course_name,
-//            'date' => now()->format('Y-m-d'),
-//        ];
-//
-//        $pdf = Pdf::loadView('certificates.template', $data);
-//
-//        $fileName = 'certificate_' . $user->username . '_' . $course->id . '.pdf';
-//        $filePath = 'public/certificates/' . $fileName;
-//
-//        Storage::put('certificates/' . $fileName, $pdf->output());
-//
-//        $certificate = Certificate::create([
-//            'user_id' => $user->id,
-//            'course_id' => $course->id,
-//            'certificate_url' => $filePath,
-//        ]);
-//
-//        $user->courses()->updateExistingPivot($course->id, [
-//            'is_completed' => true,
-//            'certificate_id' => $certificate->id
-//        ]);
-//
-//
-//        return $certificate;
-//    }
-
-
-    public function certificate():array
-    {
-        $users = User::query()->limit(5)->select('username')->get();
-        $course = Course::query()->where('id','=',23)->first();
-
-        return [
-            'data' => [
-            'username' => $users,
-            'course_name' => $course->course_name,
-            'date' => now()->format('Y-m-d'),
-                ],
-            'message' => 'success'
-        ];
-    }
 
     public function submit_project_by_students($request):array
     {
@@ -499,5 +465,240 @@ class ExamService
             ];
         }
     }
+
+    public function show_project_result($exam_id): array
+    {
+        try {
+            $user = Auth::user();
+
+            if (!$user->hasRole('teacher')) {
+                return [
+                    'data' => null,
+                    'message' => 'must be teacher to show projects'
+                ];
+            }
+
+            $query = Exam::query()
+                ->whereHas('course', function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                })
+                ->with(['questions.projectSubmissions.user:id,username,email']);
+
+            if ($exam_id) {
+                $query->where('id', $exam_id);
+            }
+
+            $exams = $query->get(['id', 'title', 'course_id']);
+
+            if ($exam_id && !Exam::where('id', $exam_id)->exists()) {
+                return [
+                    'data' => null,
+                    'message' => 'Exam not found'
+                ];
+            }
+
+            if ($exam_id && $exams->isEmpty()) {
+                return [
+                    'data' => null,
+                    'message' => 'This exam does not belong to you'
+                ];
+            }
+
+            if ($exams->isEmpty()) {
+                return [
+                    'data' => [],
+                    'message' => 'No exams found for this teacher'
+                ];
+            }
+            // نرتب البيانات
+            $result = $exams->map(function ($exam) {
+                return [
+                    'exam_id' => $exam->id,
+                    'exam_title' => $exam->title,
+                    'projects' => $exam->questions->flatMap(function ($question) {
+                        return $question->projectSubmissions->map(function ($submission) use ($question) {
+                            return [
+                                'submission_id' => $submission->id,
+                                'file_path' => $submission->file_path,
+                                'grade' => $submission->grade,
+                                'feedback' => $submission->feedback,
+                                'student' => $submission->user,
+                                'question_id' => $question->id,
+                                'question_text' => $question->question_text,
+                            ];
+                        });
+                    })->values()
+                ];
+            });
+
+            return [
+                'data' => $result,
+                'message' => 'Project submissions retrieved successfully'
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Failed to retrieve project submissions', [
+                'error' => $e->getMessage()
+            ]);
+
+            return [
+                'data' => null,
+                'message' => 'Failed to retrieve project submissions'
+            ];
+        }
+    }
+
+
+    public function show_my_project_result($project_id): array
+    {
+        try {
+            $user = Auth::user();
+
+            if (!$user->hasRole(['woman', 'child'])) {
+                return [
+                    'data' => null,
+                    'message' => 'Only students can view project results'
+                ];
+            }
+
+            $submission = ProjectSubmission::with('question.exam')
+                ->where('id', $project_id)
+                ->where('user_id', $user->id) // ✅ يمنع الوصول لمشاريع غيرو
+                ->first();
+
+            if (!$submission) {
+                return [
+                    'data' => null,
+                    'message' => 'Project not found for this user'
+                ];
+            }
+
+            // ✅ إذا لسا ما تصححت
+            if (is_null($submission->grade)) {
+                return [
+                    'data' => [
+                        'exam_title' => $submission->question->exam->title ?? null,
+                        'project_id' => $submission->id,
+                        'grade' => null,
+                        'feedback' => null,
+                    ],
+                    'message' => 'Your project is under review'
+                ];
+            }
+
+            // ✅ رجع النتيجة
+            return [
+                'data' => [
+                    'exam_title' => $submission->question->exam->title ?? null,
+                    'project_id' => $submission->id,
+                    'grade' => $submission->grade,
+                    'feedback' => $submission->feedback,
+                ],
+                'message' => 'Project result retrieved successfully'
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Failed to show project result', [
+                'error' => $e->getMessage(),
+                'project_id' => $project_id,
+                'user_id' => Auth::id(),
+            ]);
+
+            return [
+                'data' => null,
+                'message' => 'Failed to retrieve project result'
+            ];
+        }
+    }
+
+    public function correct_project($submission_id, array $data): array
+    {
+        try {
+            $user = Auth::user();
+
+            if (!$user->hasRole('teacher')) {
+                return [
+                    'data' => null,
+                    'message' => 'Only teachers can grade projects'
+                ];
+            }
+
+            // ✅ نجيب الـ submission مع كامل السلسلة لنوصل للـ exam
+            $submission = ProjectSubmission::with('question.exam.course')
+                ->find($submission_id);
+
+            if (!$submission) {
+                return [
+                    'data' => null,
+                    'message' => 'Project submission not found',
+                    'code' => 404
+                ];
+            }
+            $exam = $submission->question->exam ?? null;
+
+            if (!$exam) {
+                return [
+                    'data' => null,
+                    'message' => 'Exam not found for this project submission'
+                ];
+            }
+
+            $course_owner_id = $submission->question->exam->course->user_id ?? null;
+
+            if ($course_owner_id !== Auth::id()) {
+                return [
+                    'data' => null,
+                    'message' => 'You are not authorized to grade this project',
+                    'code' => 403
+                ];
+            }
+
+            if ($submission->user_id === Auth::id()) {
+                return [
+                    'data' => null,
+                    'message' => 'You cannot grade your own project'
+                ];
+            }
+
+            if (!is_null($submission->grade)) {
+                return [
+                    'data' => null,
+                    'message' => 'This project has already been graded'
+                ];
+            }
+
+            $submission->update([
+                'grade' => $data['grade'],
+                'feedback' => $data['feedback'] ?? null,
+            ]);
+            $leader = LeaderBoard::query()
+                ->where('leader_id' , $submission->user_id)
+                ->first();
+            $leader->points += $submission->grade/10;
+            $leader->update(['points' => $leader->points]);
+            $wallet = Wallet::query()
+                ->where('user_id',$submission->user_id)
+                ->first();
+            $wallet->balance += $submission->grade/10;
+            $wallet->update(['balance' , $wallet->balance]);
+
+            return [
+                'data' => null,
+                'message' => 'Project graded successfully'
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Failed to grade project', [
+                'error' => $e->getMessage(),
+                'submission_id' => $submission_id
+            ]);
+
+            return [
+                'data' => null,
+                'message' => 'Failed to grade the project'
+            ];
+        }
+    }
+
 
 }

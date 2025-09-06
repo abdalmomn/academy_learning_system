@@ -11,7 +11,7 @@ class CreateLeaderboardsTable extends Migration
             $table->id();
             $table->foreignId('leader_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('leader_type');
-            $table->integer('points')->default(0);
+            $table->float('points')->default(0);
             $table->timestamps();
             $table->index(['leader_id', 'leader_type']);
         });

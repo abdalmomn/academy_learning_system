@@ -29,6 +29,12 @@ class FaqController extends Controller
         $data = $this->service->getById($id);
         return $this->Success($data['data'], $data['message']);
     }
+    public function getByCategory($categoryId)
+    {
+        $data = $this->service->getByCategoryId($categoryId);
+        return $this->Success($data['data'], $data['message']);
+    }
+
 
     public function store(StoreFaqRequest $request)
     {
